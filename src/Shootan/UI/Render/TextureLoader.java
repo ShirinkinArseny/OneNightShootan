@@ -15,12 +15,12 @@ public class TextureLoader {
     private BufferedImage[] makeRotatedBitmaps(BufferedImage img) {
 
 
-        BufferedImage[] imgs=new BufferedImage[8];
-        for (int i=0; i<8; i++) {
+        BufferedImage[] imgs=new BufferedImage[360];
+        for (int i=0; i<360; i++) {
             imgs[i]=new BufferedImage(img.getWidth(), img.getHeight(), BufferedImage.TYPE_INT_ARGB);
             Graphics2D g2= (Graphics2D) imgs[i].getGraphics();
 
-            g2.rotate(i*Math.PI/4, img.getWidth()/2, img.getHeight()/2);
+            g2.rotate(i*2*Math.PI/360, img.getWidth()/2, img.getHeight()/2);
 
             g2.drawImage(img,
                     0, 0,
