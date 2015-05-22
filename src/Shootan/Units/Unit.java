@@ -9,6 +9,7 @@ public abstract class Unit {
     private float health;
     private float damageCoef;
     private long type;
+    private float radius;
 
     public boolean isMoving() {
         return block.isMoving();
@@ -28,8 +29,9 @@ public abstract class Unit {
     }
 
 
-    public Unit(float x, float y, float speed, float damageCoef, long type) {
+    public Unit(float x, float y, float radius, float speed, float damageCoef, long type) {
         block = new UnitBlock(x,y);
+        this.radius=radius;
         this.speed=speed;
         this.damageCoef=damageCoef;
         this.type=type;
@@ -73,4 +75,7 @@ public abstract class Unit {
         return type;
     }
 
+    public float getRadius() {
+        return radius;
+    }
 }

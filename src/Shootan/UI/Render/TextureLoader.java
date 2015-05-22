@@ -10,6 +10,7 @@ public class TextureLoader {
     private BufferedImage[] human;
 
     private BufferedImage brick;
+    private BufferedImage floor;
 
     private BufferedImage[] makeRotatedBitmaps(BufferedImage img) {
 
@@ -40,6 +41,7 @@ public class TextureLoader {
 
             human = makeRotatedBitmaps(ImageIO.read(this.getClass().getResourceAsStream("human.png")));
             brick = ImageIO.read(this.getClass().getResourceAsStream("brick.png"));
+            floor = ImageIO.read(this.getClass().getResourceAsStream("floor.png"));
 
 
         } catch (IOException e) {
@@ -56,8 +58,9 @@ public class TextureLoader {
     }
 
     public BufferedImage getBlockTexture(long type) {
-        return brick;
+            if (type==0) return brick;
+            if (type==1) return floor;
+        return null;
     }
-
 
 }
