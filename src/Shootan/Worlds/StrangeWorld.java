@@ -12,13 +12,8 @@ public class StrangeWorld extends World {
     private ArrayList<Unit> units=new ArrayList<>();
     private Block[][] blocks=new Block[1000][1000];
 
-    @Override
-    public Block[][] getBlocks() {
-        return blocks;
-    }
-
-    public Block getBlock(float x, float y) {
-        return blocks[(int)y][(int)x];
+    public Block getBlock(int x, int y) {
+        return blocks[y][x];
     }
 
     @Override
