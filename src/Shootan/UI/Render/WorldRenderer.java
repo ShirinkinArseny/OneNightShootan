@@ -17,7 +17,7 @@ public class WorldRenderer {
 
         for (Unit u: w.getUnits()) {
             g2.drawImage(
-                    textureLoader.getUnitTexture(u.getType())[u.getAbsoluteAngle()],
+                    textureLoader.getUnitTexture(u.getType())[u.getAngle()],
                     (int)(u.getX()*20),
                     (int)(u.getY()*20),
                     20, 20, null);

@@ -8,7 +8,17 @@ public abstract class Unit {
     private float health;
     private float damageCoef;
     private long type;
-    private int angle=0-10;
+    private int angle=0;
+
+    public boolean isMoving() {
+        return isMoving;
+    }
+
+    public void setIsMoving(boolean isMoving) {
+        this.isMoving = isMoving;
+    }
+
+    private boolean isMoving=false;
 
     public Unit(float speed, float damageCoef, long type) {
         this.speed=speed;
@@ -32,11 +42,13 @@ public abstract class Unit {
         return y;
     }
 
-    public void move(int angle) {
-        double dx=speed*Math.cos(angle*Math.PI/4);
-        double dy=speed*Math.sin(angle*Math.PI/4);
-        x+=dx;
-        y+=dy;
+    public void move() {
+        if (isMoving) {
+            double dx = speed * Math.cos(angle * Math.PI / 4);
+            double dy = speed * Math.sin(angle * Math.PI / 4);
+            x += dx;
+            y += dy;
+        }
     }
 
     public float getHealth() {
@@ -52,24 +64,10 @@ public abstract class Unit {
     }
 
     public void setAngle(int angle) {
-        if (angle>=0) {
-            this.angle = angle;
-        } else {
-            if (this.angle>=0) {
-                this.angle=this.angle-10;
-            }
-        }
+         this.angle = angle;
     }
 
     public int getAngle() {
         return angle;
-    }
-
-    public int getAbsoluteAngle() {
-        if (angle>=0) {
-            return angle;
-        } else {
-           return angle+10;
-        }
     }
 }

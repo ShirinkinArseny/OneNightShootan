@@ -122,6 +122,13 @@ public class UICanvas extends Canvas {
 
     private void update() {
 
+
+        /*
+
+        STUPID INPUT
+
+         */
+
         boolean up=false;
         boolean down=false;
         boolean left=false;
@@ -177,14 +184,24 @@ public class UICanvas extends Canvas {
                 angle=0;
             }
 
-        world.getMe().setAngle(angle);
+        if (angle >= 0) {
+            world.getMe().setAngle(angle);
+            world.getMe().setIsMoving(true);
+        } else {
+            world.getMe().setIsMoving(false);
+        }
 
 
+        /*
+
+        STUPID PHYSICS
+
+         */
 
 
         for (Unit u: world.getUnits()) {
             if (u.getAngle()>=0) {
-                u.move(u.getAngle());
+                u.move();
             }
         }
 
