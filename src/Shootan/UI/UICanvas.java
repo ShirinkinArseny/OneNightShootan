@@ -87,6 +87,14 @@ public class UICanvas extends Canvas {
             @Override
             public void componentResized(ComponentEvent e) {
 
+                try {
+                    bs = getBufferStrategy();
+                    g2 = (Graphics2D) bs.getDrawGraphics();
+                    renderer.setBlockSize(Math.max(getWidth(), getHeight())*2/World.getPotentialViewDistance);
+                } catch (NullPointerException ex) {
+                    //ignore
+                }
+
             }
 
             @Override

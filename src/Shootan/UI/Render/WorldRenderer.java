@@ -14,10 +14,16 @@ public class WorldRenderer {
         textureLoader=new TextureLoader();
     }
 
+    private int blockSize=100;
+
+    public void setBlockSize(int size) {
+        blockSize=size;
+    }
+
     public void draw(Graphics2D g2, int width, int height, StrangeWorld w) {
 
-        float dx=width/2-w.getMe().getX()*20;
-        float dy=height/2-w.getMe().getY()*20;
+        float dx=width/2-w.getMe().getX()*blockSize;
+        float dy=height/2-w.getMe().getY()*blockSize;
 
         int blockX=w.getMe().getBlockX();
         int blockY=w.getMe().getBlockY();
@@ -29,9 +35,9 @@ public class WorldRenderer {
                 if (w.isVisible(x, y)) {
                     g2.drawImage(
                             textureLoader.getBlockTexture(w.getBlock(x, y).getType()),
-                            (int) (x * 20 + dx),
-                            (int) (y * 20 + dy),
-                            20, 20, null);
+                            (int) (x * blockSize + dx),
+                            (int) (y * blockSize + dy),
+                            blockSize, blockSize, null);
                 }
 
             }
@@ -42,9 +48,9 @@ public class WorldRenderer {
         for (Unit u: w.getUnits()) {
             g2.drawImage(
                     textureLoader.getUnitTexture(u.getType())[u.getAngle()],
-                    (int)(u.getX()*20+dx),
-                    (int)(u.getY()*20+dy),
-                    20, 20, null);
+                    (int)(u.getX()*blockSize+dx),
+                    (int)(u.getY()*blockSize+dy),
+                    blockSize, blockSize, null);
         }
 
 
