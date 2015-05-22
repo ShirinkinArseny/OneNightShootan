@@ -3,7 +3,7 @@ package Shootan.Units;
 public class Human extends Unit {
 
     public Human(float x, float y) {
-        super(x, y, 1f, 5f, 1, 0);
+        super(x, y, 0.5f, 5f, 1, 0);
     }
 
 }
