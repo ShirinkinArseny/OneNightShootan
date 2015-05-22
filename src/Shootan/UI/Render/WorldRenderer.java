@@ -28,6 +28,8 @@ public class WorldRenderer {
         int blockX=w.getMe().getBlockX();
         int blockY=w.getMe().getBlockY();
 
+        g2.setColor(new Color(255, 128, 0));
+        g2.setStroke(new BasicStroke(7));
         for (int x=blockX-World.getPotentialViewDistance; x<=blockX+World.getPotentialViewDistance; x++) {
 
             for (int y=blockY-World.getPotentialViewDistance; y<=blockY+World.getPotentialViewDistance; y++) {
@@ -38,6 +40,12 @@ public class WorldRenderer {
                             (int) (x * blockSize + dx),
                             (int) (y * blockSize + dy),
                             blockSize, blockSize, null);
+                    if (w.getBlock(x, y).hiLight) {
+                        g2.drawRect(
+                                (int) (x * blockSize + dx),
+                                (int) (y * blockSize + dy),
+                                blockSize, blockSize);
+                    }
                 }
 
             }
