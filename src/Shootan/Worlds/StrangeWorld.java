@@ -17,6 +17,10 @@ public class StrangeWorld extends World {
         return blocks;
     }
 
+    public Block getBlock(float x, float y) {
+        return blocks[(int)y][(int)x];
+    }
+
     @Override
     public ArrayList<Unit> getUnits() {
         return units;
