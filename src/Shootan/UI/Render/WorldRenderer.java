@@ -13,13 +13,38 @@ public class WorldRenderer {
         textureLoader=new TextureLoader();
     }
 
-    public void draw(Graphics2D g2, World w) {
+    public void draw(Graphics2D g2, int width, int height, World w) {
+
+        float dx=width/2-w.getMe().getX()*20;
+        float dy=height/2-w.getMe().getY()*20;
+
+        int blockX=w.getMe().getBlockX();
+        int blockY=w.getMe().getBlockY();
+
+        for (int x=blockX-World.getPotentialViewDistance; x<=blockX+World.getPotentialViewDistance; x++) {
+
+            for (int y=blockY-World.getPotentialViewDistance; y<=blockY+World.getPotentialViewDistance; y++) {
+
+                try {
+                    g2.drawImage(
+                            textureLoader.getBlockTexture(w.getBlock(x, y).getType()),
+                            (int) (x * 20 + dx),
+                            (int) (y * 20 + dy),
+                            20, 20, null);
+                } catch (Exception e) {
+
+                }
+
+            }
+
+        }
+
 
         for (Unit u: w.getUnits()) {
             g2.drawImage(
                     textureLoader.getUnitTexture(u.getType())[u.getAngle()],
-                    (int)(u.getX()*20),
-                    (int)(u.getY()*20),
+                    (int)(u.getX()*20+dx),
+                    (int)(u.getY()*20+dy),
                     20, 20, null);
         }
 

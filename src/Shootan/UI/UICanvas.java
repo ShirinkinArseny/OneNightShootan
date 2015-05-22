@@ -221,7 +221,7 @@ public class UICanvas extends Canvas {
         g2.fillRect(0, 0, getWidth(), getHeight());
 
 
-        renderer.draw(g2, world);
+        renderer.draw(g2, getWidth(), getHeight(), world);
 
 
 
