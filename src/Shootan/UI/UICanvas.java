@@ -1,6 +1,10 @@
-package Shootan;
+package Shootan.UI;
 
-import Shootan.Render.WorldRenderer;
+import Shootan.Units.Human;
+import Shootan.Units.Unit;
+import Shootan.Worlds.StrangeWorld;
+import Shootan.Worlds.World;
+import Shootan.UI.Render.WorldRenderer;
 
 import javax.swing.*;
 import java.awt.*;

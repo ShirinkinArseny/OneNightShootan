@@ -1,4 +1,8 @@
-package Shootan;
+package Shootan.Worlds;
+
+import Shootan.Blocks.Block;
+import Shootan.Blocks.Brick;
+import Shootan.Units.Unit;
 
 import java.util.ArrayList;
 

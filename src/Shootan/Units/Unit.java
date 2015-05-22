@@ -1,4 +1,4 @@
-package Shootan;
+package Shootan.Units;
 
 public abstract class Unit {
 

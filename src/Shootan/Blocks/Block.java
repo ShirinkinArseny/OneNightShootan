@@ -1,4 +1,4 @@
-package Shootan;
+package Shootan.Blocks;
 
 public abstract class Block {
 

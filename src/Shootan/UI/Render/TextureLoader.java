@@ -1,4 +1,4 @@
-package Shootan.Render;
+package Shootan.UI.Render;
 
 import javax.imageio.ImageIO;
 import java.awt.*;
@@ -22,7 +22,7 @@ public class TextureLoader {
             g2.rotate(i*4/Math.PI, img.getWidth()/2, img.getHeight()/2);
 
             g2.drawImage(img,
-                    0, 0, img.getWidth(), img.getHeight(),
+                    0, 0,
                     null
             );
 

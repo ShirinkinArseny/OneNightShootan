@@ -1,4 +1,4 @@
-package Shootan;
+package Shootan.UI;
 
 import javax.swing.*;
 

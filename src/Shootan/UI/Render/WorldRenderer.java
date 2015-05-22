@@ -1,7 +1,7 @@
-package Shootan.Render;
+package Shootan.UI.Render;
 
-import Shootan.Unit;
-import Shootan.World;
+import Shootan.Units.Unit;
+import Shootan.Worlds.World;
 
 import java.awt.*;
 
