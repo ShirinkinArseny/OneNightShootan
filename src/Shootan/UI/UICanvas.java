@@ -1,7 +1,6 @@
 package Shootan.UI;
 
 import Shootan.Units.Human;
-import Shootan.Units.Unit;
 import Shootan.Worlds.StrangeWorld;
 import Shootan.Worlds.World;
 import Shootan.UI.Render.WorldRenderer;
@@ -14,6 +13,17 @@ import java.awt.image.BufferStrategy;
 public class UICanvas extends Canvas {
 
     private boolean[] keys=new boolean[256];
+
+    private void mouseMovedOrDragged(int newx, int newy) {
+
+        int dx=newx-getWidth()/2;
+        int dy=newy-getHeight()/2;
+        float angle=0;
+        if (dx!=0 || dy!=0) {
+            angle= (float) Math.atan2(dy, dx);
+        }
+        world.getMe().setViewAngle(angle);
+    }
 
     public UICanvas() {
         super();
@@ -45,10 +55,12 @@ public class UICanvas extends Canvas {
         addMouseMotionListener(new MouseMotionListener() {
             @Override
             public void mouseDragged(MouseEvent e) {
+                mouseMovedOrDragged(e.getX(), e.getY());
             }
 
             @Override
             public void mouseMoved(MouseEvent e) {
+                mouseMovedOrDragged(e.getX(), e.getY());
             }
         });
 
@@ -59,10 +71,12 @@ public class UICanvas extends Canvas {
 
             @Override
             public void mousePressed(MouseEvent e) {
+                world.getMe().getWeapon().setWannaShot(true);
             }
 
             @Override
             public void mouseReleased(MouseEvent e) {
+                world.getMe().getWeapon().setWannaShot(false);
             }
 
             @Override
@@ -187,35 +201,35 @@ public class UICanvas extends Canvas {
             right=false;
         }
 
-        int angle=-1;
+        double angle=-1;
 
         if (up) {
             if (left) {
-                angle=5;
+                angle=Math.PI*5/4;
             } else
             if (right) {
-                angle=7;
+                angle=Math.PI*7/4;
             } else
-                angle=6;
+                angle=Math.PI*6/4;
         } else
         if (down) {
             if (left) {
-                angle=3;
+                angle=Math.PI*3/4;
             } else
             if (right) {
-                angle=1;
+                angle=Math.PI*1/4;
             } else
-                angle=2;
+                angle=Math.PI*2/4;
         } else
             if (left) {
-                angle=4;
+                angle=Math.PI*4/4;
             } else
             if (right) {
                 angle=0;
             }
 
         if (angle >= 0) {
-            world.getMe().setAngle(angle);
+            world.getMe().setMotionAngle((float) angle);
             world.getMe().setIsMoving(true);
         } else {
             world.getMe().setIsMoving(false);

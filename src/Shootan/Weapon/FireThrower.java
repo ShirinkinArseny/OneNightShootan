@@ -1,27 +1,28 @@
 package Shootan.Weapon;
 
 import Shootan.Bullets.AbstractBullet;
-import Shootan.Bullets.Rocket;
+import Shootan.Bullets.Flame;
+import Shootan.Bullets.SmallBullet;
 import Shootan.Units.Unit;
 
-public class RockerLauncher extends Weapon {
+public class FireThrower extends Weapon {
 
-    public RockerLauncher(Unit owner) {
+    public FireThrower(Unit owner) {
         super(owner);
     }
 
     @Override
     protected long getShotDelayMilliseconds() {
-        return 1000;
+        return 50;
     }
 
     @Override
     protected boolean getIsInSingleShotMode() {
-        return true;
+        return false;
     }
 
     @Override
     protected AbstractBullet shot() {
-        return new Rocket(owner.getId(), owner.getX(), owner.getY(), owner.getViewAngle());
+        return new Flame(owner.getId(), owner.getX(), owner.getY(), owner.getViewAngle());
     }
 }

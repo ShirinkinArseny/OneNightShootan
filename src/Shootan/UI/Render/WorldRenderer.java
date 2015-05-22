@@ -1,5 +1,6 @@
 package Shootan.UI.Render;
 
+import Shootan.Bullets.AbstractBullet;
 import Shootan.Units.Unit;
 import Shootan.Worlds.StrangeWorld;
 import Shootan.Worlds.World;
@@ -20,7 +21,12 @@ public class WorldRenderer {
         blockSize=size;
     }
 
+    private long lastTimeNanos=System.nanoTime();
     public void draw(Graphics2D g2, int width, int height, StrangeWorld w) {
+
+        long currentTimeNanos=System.nanoTime();
+        float sec= (currentTimeNanos-lastTimeNanos)/1000000000.0f;
+        lastTimeNanos=currentTimeNanos;
 
         float dx=width/2-w.getMe().getX()*blockSize;
         float dy=height/2-w.getMe().getY()*blockSize;
@@ -55,10 +61,23 @@ public class WorldRenderer {
 
         for (Unit u: w.getUnits()) {
             g2.drawImage(
-                    textureLoader.getUnitTexture(u.getType())[u.getAngle()],
-                    (int)(u.getX()*blockSize+dx),
-                    (int)(u.getY()*blockSize+dy),
+                    textureLoader.getUnitTexture(u.getType())[((int) (u.getViewAngle() * 360 / 2 / Math.PI))],
+                    (int)((u.getX()-u.getRadius())*blockSize+dx),
+                    (int)((u.getY()-u.getRadius())*blockSize+dy),
                     blockSize, blockSize, null);
+        }
+
+        g2.setColor(new Color(255, 255, 255));
+        g2.setStroke(new BasicStroke(3));
+        for (AbstractBullet b: w.getBullets()) {
+
+
+            g2.drawLine(
+                    (int) (b.getX()* blockSize + dx),
+                    (int) (b.getY()* blockSize + dy),
+                    (int) ((b.getX()+b.getDX()*sec)* blockSize + dx),
+                    (int) ((b.getY()+ b.getDY()*sec)* blockSize + dy));
+
         }
 
 

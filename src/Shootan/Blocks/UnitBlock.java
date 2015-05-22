@@ -1,10 +1,10 @@
 package Shootan.Blocks;
 
 public class UnitBlock {
-    private static final double minAngle = (Math.PI / 4);
-
 
     private float radius;
+    private float angle;
+
     public float getRadius() {
         return radius;
     }
@@ -52,7 +52,7 @@ public class UnitBlock {
     public UnitBlock(float x, float y, float radius) {
         this.x = x; this.y = y; this.radius = radius;
     }
-    private UnitBlock(float x, float y, float radius, int angle, boolean prevDxPos, boolean prevDyPos) {
+    private UnitBlock(float x, float y, float radius, float angle, boolean prevDxPos, boolean prevDyPos) {
         this(x,y,radius);
         this.prevDxPos = prevDxPos; this.prevDyPos = prevDyPos;
     }
@@ -60,11 +60,19 @@ public class UnitBlock {
     public UnitBlock moveBlock(float dt, float speed) {
         if (isMoving) {
             double way=speed*dt;
-            double dx = way * Math.cos(angle * minAngle);
-            double dy = way * Math.sin(angle * minAngle);
+            double dx = way * Math.cos(angle);
+            double dy = way * Math.sin(angle);
             prevDxPos = dx>0; prevDyPos = dy>0;
             return new UnitBlock((float)(x+dx),(float)(y+dy),radius,angle,prevDxPos,prevDyPos);
         }
         return null;
+    }
+
+    public void setAngle(float angle) {
+        this.angle = angle;
+    }
+
+    public float getAngle() {
+        return angle;
     }
 }

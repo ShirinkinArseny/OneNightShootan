@@ -10,14 +10,18 @@ public abstract class AbstractBullet {
 
     protected float x;
     protected float y;
-    private float hasDistance;
-    private float angle;
-    private long author;
+    protected float dx;
+    protected float dy;
+    protected float hasDistance;
+    protected float angle;
+    protected long author;
 
     public AbstractBullet(long author, float x, float y, float angle, long type, float speed, float distance, float damage) {
         this.author = author;
         this.x = x;
         this.y = y;
+        this.dx= (float) (Math.cos(angle)*speed);
+        this.dy= (float) (Math.sin(angle)*speed);
         this.angle = angle;
         this.type=type;
         this.speed=speed;
@@ -49,5 +53,29 @@ public abstract class AbstractBullet {
 
     public long getType() {
         return type;
+    }
+
+    public float getY() {
+        return y;
+    }
+
+    public float getX() {
+        return x;
+    }
+
+    public int getBlockX() {
+        return (int) Math.floor(x);
+    }
+
+    public int getBlockY() {
+        return (int) Math.floor(y);
+    }
+
+    public float getDX() {
+        return dx;
+    }
+
+    public float getDY() {
+        return dy;
     }
 }
