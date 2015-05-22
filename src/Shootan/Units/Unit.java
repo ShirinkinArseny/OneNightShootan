@@ -20,7 +20,9 @@ public abstract class Unit {
 
     private boolean isMoving=false;
 
-    public Unit(float speed, float damageCoef, long type) {
+    public Unit(float x, float y, float speed, float damageCoef, long type) {
+        this.x=x;
+        this.y=y;
         this.speed=speed;
         this.damageCoef=damageCoef;
         this.type=type;

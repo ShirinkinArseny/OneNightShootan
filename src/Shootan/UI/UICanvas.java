@@ -121,7 +121,7 @@ public class UICanvas extends Canvas {
     private BufferStrategy bs;
     private Graphics2D g2;
 
-    private World world=new StrangeWorld(new Human());
+    private World world=new StrangeWorld(new Human(10, 10));
     private WorldRenderer renderer=new WorldRenderer();
 
     private long lastTimeNanos=System.nanoTime();
