@@ -1,6 +1,7 @@
 package Shootan.Units;
 
 import Shootan.Blocks.UnitBlock;
+import Shootan.Geometry.Vector;
 
 public abstract class Unit {
 
@@ -19,13 +20,16 @@ public abstract class Unit {
     }
 
 
-    public void setAngle(int angle) {
-        block.setAngle(angle);
+
+    private int angle=0;
+    public void lookAtPoint(float x, float y) {
+        angle = new Vector(block.getX(),block.getY(),x,y).getIntAngle();
     }
 
     public int getAngle() {
-        return block.getAngle();
+        return angle;
     }
+
 
 
     public Unit(float x, float y, float radius, float speed, float damageCoef, long type) {

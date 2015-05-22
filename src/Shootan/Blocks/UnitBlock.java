@@ -11,13 +11,25 @@ public class UnitBlock {
 
     private float x;
     private float y;
+    private boolean prevDxPos,prevDyPos;
 
+
+    //Такое округление неочевидно, но
+    //именно оно позволяет не пересекаться с препядствиями
     public int getBlockX() {
-        return (int) Math.floor(x);
+        int num = (int) Math.floor(x);
+        if (prevDxPos)
+            return num+1;
+        else
+            return num;
     }
 
     public int getBlockY() {
-        return (int) Math.floor(y);
+        int num = (int) Math.floor(y);
+        if (prevDyPos)
+            return num+1;
+        else
+            return num;
     }
 
     public float getX() {
@@ -26,15 +38,6 @@ public class UnitBlock {
 
     public float getY() {
         return y;
-    }
-
-    private int angle=0;
-    public void setAngle(int angle) {
-        this.angle = angle;
-    }
-
-    public int getAngle() {
-        return angle;
     }
 
     private boolean isMoving=false;
@@ -49,9 +52,9 @@ public class UnitBlock {
     public UnitBlock(float x, float y, float radius) {
         this.x = x; this.y = y; this.radius = radius;
     }
-    private UnitBlock(float x, float y, float radius, int angle) {
+    private UnitBlock(float x, float y, float radius, int angle, boolean prevDxPos, boolean prevDyPos) {
         this(x,y,radius);
-        this.angle = angle;
+        this.prevDxPos = prevDxPos; this.prevDyPos = prevDyPos;
     }
 
     public UnitBlock moveBlock(float dt, float speed) {
@@ -59,7 +62,8 @@ public class UnitBlock {
             double way=speed*dt;
             double dx = way * Math.cos(angle * minAngle);
             double dy = way * Math.sin(angle * minAngle);
-            return new UnitBlock((float)(x-dx),(float)(y-dy),radius,angle);
+            prevDxPos = dx>0; prevDyPos = dy>0;
+            return new UnitBlock((float)(x+dx),(float)(y+dy),radius,angle,prevDxPos,prevDyPos);
         }
         return null;
     }

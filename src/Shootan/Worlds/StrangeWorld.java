@@ -37,14 +37,34 @@ public class StrangeWorld extends World {
         return !getBlock(x,y).getIsHard();
     }
 
+    private ArrayList<Block> highlighted = new ArrayList<>(10);
+    private boolean isRightToMove(UnitBlock block) {
+        //Удаляем подсветку
+        for (Block b : highlighted)
+            b.hiLight = false;
+        highlighted.clear();
+        //Получаем все ближайшие блоки
+        int x0 = block.getBlockX(); int y0 = block.getBlockY();
+        for (int x=x0-1; x<=x0+2; x++)
+            for (int y=y0-1; y<=y0+2; y++)
+                if (x>=0 && x<SIZE && y>=0 && y<SIZE && !(x==x0 && y==y0)) {
+                    //Подсвечиваем
+                    getBlock(x,y).hiLight=true;
+                    highlighted.add(getBlock(x,y));
+                }
+        return true;
+    }
+
     @Override
     public void update(float deltaTime) {
 
 
         for (Unit u: units) {
             UnitBlock newBlock = u.tryMove(deltaTime);
-            if (newBlock!=null && possibleToMoveUnit(newBlock.getBlockX(),newBlock.getBlockY()))
+            if (newBlock!=null && possibleToMoveUnit(newBlock.getBlockX(),newBlock.getBlockY())) {
+                isRightToMove(newBlock);
                 u.applyMove(newBlock);
+            }
         }
 
     }
