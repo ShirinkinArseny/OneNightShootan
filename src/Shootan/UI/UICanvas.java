@@ -133,12 +133,25 @@ public class UICanvas extends Canvas {
     private WorldRenderer renderer=new WorldRenderer();
 
     private long lastTimeNanos=System.nanoTime();
+    private float summaryTime=0;
+    private int frames=0;
 
     private void update() {
 
         long currentTimeNanos=System.nanoTime();
-        float sec= (lastTimeNanos-currentTimeNanos)/1000000000.0f;
+        float sec= (currentTimeNanos-lastTimeNanos)/1000000000.0f;
         lastTimeNanos=currentTimeNanos;
+
+        summaryTime+=sec;
+        frames++;
+        if (frames==100) {
+
+            System.out.println("FPS: "+100/summaryTime);
+            frames=0;
+            summaryTime=0;
+        }
+
+
 
         /*
 
