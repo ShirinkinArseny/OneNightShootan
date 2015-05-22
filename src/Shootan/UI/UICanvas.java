@@ -120,8 +120,13 @@ public class UICanvas extends Canvas {
     private World world=new StrangeWorld(new Human());
     private WorldRenderer renderer=new WorldRenderer();
 
+    private long lastTimeNanos=System.nanoTime();
+
     private void update() {
 
+        long currentTimeNanos=System.nanoTime();
+        float sec= (lastTimeNanos-currentTimeNanos)/1000000000.0f;
+        lastTimeNanos=currentTimeNanos;
 
         /*
 
@@ -192,18 +197,8 @@ public class UICanvas extends Canvas {
         }
 
 
-        /*
 
-        STUPID PHYSICS
-
-         */
-
-
-        for (Unit u: world.getUnits()) {
-            if (u.getAngle()>=0) {
-                u.move();
-            }
-        }
+        world.update(sec);
 
 
 

@@ -15,8 +15,6 @@ public abstract class World {
 
     public abstract Unit getMe();
 
-    public void update(float deltaTime) {
-
-    }
+    public abstract void update(float deltaTime);
 
 }

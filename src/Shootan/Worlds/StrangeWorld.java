@@ -30,6 +30,19 @@ public class StrangeWorld extends World {
         return me;
     }
 
+    @Override
+    public void update(float deltaTime) {
+
+
+        for (Unit u: units) {
+                u.move(deltaTime);
+            /*if (COLLIDED) {
+                u.unmove(deltaTime);
+            }*/
+        }
+
+    }
+
     public StrangeWorld(Unit me) {
         this.me = me;
         units.add(me);

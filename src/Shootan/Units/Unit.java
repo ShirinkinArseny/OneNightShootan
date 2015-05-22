@@ -42,12 +42,23 @@ public abstract class Unit {
         return y;
     }
 
-    public void move() {
+    public void move(float dt) {
         if (isMoving) {
-            double dx = speed * Math.cos(angle * Math.PI / 4);
-            double dy = speed * Math.sin(angle * Math.PI / 4);
+            double way=speed*dt;
+            double dx = way * Math.cos(angle * Math.PI / 4);
+            double dy = way * Math.sin(angle * Math.PI / 4);
             x += dx;
             y += dy;
+        }
+    }
+
+    public void unmove(float dt) {
+        if (isMoving) {
+            double way=speed*dt;
+            double dx = way * Math.cos(angle * Math.PI / 4);
+            double dy = way * Math.sin(angle * Math.PI / 4);
+            x -= dx;
+            y -= dy;
         }
     }
 
