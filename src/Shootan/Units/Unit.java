@@ -9,7 +9,6 @@ public abstract class Unit {
     private float health;
     private float damageCoef;
     private long type;
-    private float radius;
 
     public boolean isMoving() {
         return block.isMoving();
@@ -30,19 +29,18 @@ public abstract class Unit {
 
 
     public Unit(float x, float y, float radius, float speed, float damageCoef, long type) {
-        block = new UnitBlock(x,y);
-        this.radius=radius;
+        block = new UnitBlock(x,y,radius);
         this.speed=speed;
         this.damageCoef=damageCoef;
         this.type=type;
     }
 
     public int getBlockX() {
-        return (int) Math.floor(getX());
+        return block.getBlockX();
     }
 
     public int getBlockY() {
-        return (int) Math.floor(getY());
+        return block.getBlockY();
     }
 
     public float getX() {
@@ -54,13 +52,17 @@ public abstract class Unit {
     }
 
     public UnitBlock tryMove(float dt) {
-        return block.moveBlock(dt,speed);
+        return block.moveBlock(dt, speed);
     }
 
     public void move(float dt) {
         UnitBlock newBlock = block.moveBlock(dt,speed);
         if (newBlock!=null)
-            block = newBlock;
+            applyMove(newBlock);
+    }
+
+    public void applyMove(UnitBlock newBlock) {
+        block = newBlock;
     }
 
     public float getHealth() {
@@ -75,7 +77,5 @@ public abstract class Unit {
         return type;
     }
 
-    public float getRadius() {
-        return radius;
-    }
+    public float getRadius() {return block.getRadius();}
 }

@@ -3,6 +3,7 @@ package Shootan.Worlds;
 import Shootan.Blocks.Block;
 import Shootan.Blocks.Brick;
 import Shootan.Blocks.Floor;
+import Shootan.Blocks.UnitBlock;
 import Shootan.Units.Unit;
 
 import java.util.ArrayList;
@@ -20,7 +21,7 @@ public class StrangeWorld extends World {
     }
 
     public boolean isVisible(int x, int y) {
-        return (x>=0 & x<SIZE & y>=0 & y<SIZE);
+        return (x>=0 && x<SIZE && y>=0 && y<SIZE);
     }
 
     @Override
@@ -32,15 +33,18 @@ public class StrangeWorld extends World {
         return me;
     }
 
+    private boolean possibleToMoveUnit(int x, int y) {
+        return !getBlock(x,y).getIsHard();
+    }
+
     @Override
     public void update(float deltaTime) {
 
 
         for (Unit u: units) {
-                u.move(deltaTime);
-            /*if (COLLIDED) {
-                u.unmove(deltaTime);
-            }*/
+            UnitBlock newBlock = u.tryMove(deltaTime);
+            if (newBlock!=null && possibleToMoveUnit(newBlock.getBlockX(),newBlock.getBlockY()))
+                u.applyMove(newBlock);
         }
 
     }
