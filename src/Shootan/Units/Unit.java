@@ -5,6 +5,11 @@ import Shootan.Geometry.Vector;
 
 public abstract class Unit {
 
+    public long getId() {
+        return id;
+    }
+
+    private final long id;
     private UnitBlock block;
     private float speed;
     private float health;
@@ -30,6 +35,7 @@ public abstract class Unit {
         return angle;
     }
 
+    private static long idCounter=0;
 
 
     public Unit(float x, float y, float radius, float speed, float damageCoef, long type) {
@@ -37,6 +43,8 @@ public abstract class Unit {
         this.speed=speed;
         this.damageCoef=damageCoef;
         this.type=type;
+        this.id=idCounter;
+        idCounter++;
     }
 
     public int getBlockX() {
