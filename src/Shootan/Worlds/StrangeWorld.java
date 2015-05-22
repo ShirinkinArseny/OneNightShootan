@@ -2,6 +2,7 @@ package Shootan.Worlds;
 
 import Shootan.Blocks.Block;
 import Shootan.Blocks.Brick;
+import Shootan.Blocks.Floor;
 import Shootan.Units.Unit;
 
 import java.util.ArrayList;
@@ -47,11 +48,29 @@ public class StrangeWorld extends World {
     public StrangeWorld(Unit me) {
         this.me = me;
         units.add(me);
+
         for (int i=0; i<SIZE; i++) {
             for (int j=0; j<SIZE; j++) {
                 blocks[i][j]=new Brick();
             }
         }
+
+        for (int i=5; i<15; i++) {
+            for (int j=5; j<15; j++) {
+                blocks[i][j]=new Floor();
+            }
+        }
+
+        for (int j=5; j<40; j++) {
+            blocks[5][j]=new Floor();
+            blocks[6][j]=new Floor();
+        }
+
+        for (int j=5; j<40; j++) {
+            blocks[j][5]=new Floor();
+            blocks[j][6]=new Floor();
+        }
+
     }
 
 }
