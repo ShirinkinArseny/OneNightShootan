@@ -47,7 +47,7 @@ public class UnitBlock {
     }
 
     public UnitBlock(float x, float y, float radius) {
-        this.x = x; this.y = y;
+        this.x = x; this.y = y; this.radius = radius;
     }
     private UnitBlock(float x, float y, float radius, int angle) {
         this(x,y,radius);
@@ -59,7 +59,7 @@ public class UnitBlock {
             double way=speed*dt;
             double dx = way * Math.cos(angle * minAngle);
             double dy = way * Math.sin(angle * minAngle);
-            return new UnitBlock((float)(x-dx),(float)(y-dy),angle);
+            return new UnitBlock((float)(x-dx),(float)(y-dy),radius,angle);
         }
         return null;
     }
