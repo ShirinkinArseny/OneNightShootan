@@ -19,7 +19,7 @@ public class TextureLoader {
             imgs[i]=new BufferedImage(img.getWidth(), img.getHeight(), BufferedImage.TYPE_INT_ARGB);
             Graphics2D g2= (Graphics2D) imgs[i].getGraphics();
 
-            g2.rotate(i*4/Math.PI, img.getWidth()/2, img.getHeight()/2);
+            g2.rotate(i*Math.PI/4, img.getWidth()/2, img.getHeight()/2);
 
             g2.drawImage(img,
                     0, 0,

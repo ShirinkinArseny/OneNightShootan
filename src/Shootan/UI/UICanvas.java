@@ -29,12 +29,16 @@ public class UICanvas extends Canvas {
 
             @Override
             public void keyPressed(KeyEvent e) {
-                keys[e.getKeyCode()]=true;
+                if (e.getKeyCode()<256) {
+                    keys[e.getKeyCode()] = true;
+                }
             }
 
             @Override
             public void keyReleased(KeyEvent e) {
+                if (e.getKeyCode()<256) {
                 keys[e.getKeyCode()]=false;
+                }
             }
         });
 
