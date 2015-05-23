@@ -8,6 +8,7 @@ import Shootan.Bullets.AbstractBullet;
 import Shootan.Units.Unit;
 
 import java.util.ArrayList;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 public class StrangeWorld extends World {
 
@@ -16,7 +17,7 @@ public class StrangeWorld extends World {
     private Unit me;
     private ArrayList<Unit> units = new ArrayList<>();
     private Block[][] blocks = new Block[SIZE][SIZE];
-    private boolean[][] visibility = new boolean[SIZE][SIZE];
+    private AtomicBoolean[][] visibility = new AtomicBoolean[SIZE][SIZE];
 
     public Block getBlock(int x, int y) {
         return blocks[y][x];
@@ -24,7 +25,7 @@ public class StrangeWorld extends World {
 
     public boolean isVisible(int x, int y) {
         if (!(x >= 0 && x < SIZE && y >= 0 && y < SIZE)) return false;
-        if (Math.pow(getMe().getX()-x, 2)+Math.pow(getMe().getY()-y, 2)>100) return false;
+        //if (Math.pow(getMe().getX()-x, 2)+Math.pow(getMe().getY()-y, 2)>100) return false;
 
 
 
@@ -170,7 +171,7 @@ public class StrangeWorld extends World {
         for (int i = 0; i < SIZE; i++) {
             for (int j = 0; j < SIZE; j++) {
                 blocks[i][j] = new Brick();
-                visibility[i][j]=true;
+                visibility[i][j]=new AtomicBoolean(true);
             }
         }
 
