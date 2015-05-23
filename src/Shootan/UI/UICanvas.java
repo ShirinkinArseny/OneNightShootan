@@ -1,5 +1,6 @@
 package Shootan.UI;
 
+import Shootan.UI.Render.UIRender;
 import Shootan.Units.Human;
 import Shootan.Worlds.StrangeWorld;
 import Shootan.Worlds.World;
@@ -134,7 +135,7 @@ public class UICanvas extends Canvas {
         createBufferStrategy(3);
         bs = getBufferStrategy();
         g2 = (Graphics2D) bs.getDrawGraphics();
-        new Timer(20, e -> {
+        new Timer(10, e -> {
             update();
             draw();
         }).start();
@@ -145,6 +146,7 @@ public class UICanvas extends Canvas {
 
     private StrangeWorld world=new StrangeWorld(new Human(10, 10));
     private WorldRenderer renderer=new WorldRenderer();
+    private UIRender uiRenderer=new UIRender();
 
     private long lastTimeNanos=System.nanoTime();
     private float summaryTime=0;
@@ -258,6 +260,8 @@ public class UICanvas extends Canvas {
 
         renderer.draw(g2, getWidth(), getHeight(), world);
 
+
+        uiRenderer.draw(g2, getWidth(), getHeight(), world);
 
 
         bs.show();

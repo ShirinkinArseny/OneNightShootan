@@ -1,10 +1,7 @@
 package Shootan.Units;
 
 import Shootan.Blocks.UnitBlock;
-import Shootan.Weapon.MP40;
-import Shootan.Weapon.RockerLauncher;
-import Shootan.Weapon.SniperRifle;
-import Shootan.Weapon.Weapon;
+import Shootan.Weapon.*;
 
 public abstract class Unit {
 
@@ -107,7 +104,6 @@ public abstract class Unit {
 
     public void damage(float power) {
         health-=power*damageCoef;
-        System.out.println("New health: "+health);
     }
 
     public long getType() {
@@ -115,6 +111,8 @@ public abstract class Unit {
     }
 
     public float getRadius() {return block.getRadius();}
+
+    public float getRadiusQuad() {return block.getRadiusQuad();}
 
     public Weapon getWeapon() {
         return weapon;

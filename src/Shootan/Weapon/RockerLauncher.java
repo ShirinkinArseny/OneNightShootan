@@ -11,8 +11,8 @@ public class RockerLauncher extends Weapon {
     }
 
     @Override
-    protected long getShotDelayMilliseconds() {
-        return 1000;
+    protected float getShotDelay() {
+        return 1;
     }
 
     @Override

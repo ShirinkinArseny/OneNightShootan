@@ -6,7 +6,7 @@ import static org.junit.Assert.assertTrue;
 
 public class Utils {
 
-    public float getQuadDistFromPointToLine(float lineX1, float lintY1, float lineX2, float lineY2, float pointX, float pointY) {
+    public static float getQuadDistFromPointToLine(float lineX1, float lintY1, float lineX2, float lineY2, float pointX, float pointY) {
 
 
         float dx=lineX2-lineX1;

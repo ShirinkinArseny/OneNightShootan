@@ -12,8 +12,8 @@ public class MP40 extends Weapon {
     }
 
     @Override
-    protected long getShotDelayMilliseconds() {
-        return 100;
+    protected float getShotDelay() {
+        return 0.1f;
     }
 
     @Override

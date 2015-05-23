@@ -12,8 +12,8 @@ public class FireThrower extends Weapon {
     }
 
     @Override
-    protected long getShotDelayMilliseconds() {
-        return 50;
+    protected float getShotDelay() {
+        return 0.1f;
     }
 
     @Override

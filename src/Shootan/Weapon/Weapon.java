@@ -11,18 +11,27 @@ public abstract class Weapon {
         this.owner = owner;
     }
 
-    protected abstract long getShotDelayMilliseconds();
+    protected abstract float getShotDelay();
 
-    private long lashShotTime=0;
+    private float lashShotTime=0;
 
-    public AbstractBullet getNewBullet() {
+    public float getTimeToNextShot() {
+        if (lashShotTime<0) return 0;
+        return lashShotTime/getShotDelay();
+    }
+
+    public AbstractBullet getNewBullet(float dt) {
+        if (lashShotTime>0) {
+            lashShotTime-=dt;
+        }
+
         if (wannaShot) {
 
-            if (System.currentTimeMillis()-lashShotTime>=getShotDelayMilliseconds()) {
+            if (lashShotTime<=0) {
                 if (getIsInSingleShotMode()) {
                     wannaShot = false;
                 }
-                lashShotTime=System.currentTimeMillis();
+                lashShotTime=getShotDelay();
                 return shot();
             }
         }

@@ -12,8 +12,8 @@ public class SniperRifle extends Weapon {
     }
 
     @Override
-    protected long getShotDelayMilliseconds() {
-        return 3000;
+    protected float getShotDelay() {
+        return 3;
     }
 
     @Override

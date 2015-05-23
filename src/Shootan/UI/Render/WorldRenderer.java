@@ -34,20 +34,29 @@ public class WorldRenderer {
         int blockX=w.getMe().getBlockX();
         int blockY=w.getMe().getBlockY();
 
-        g2.setColor(new Color(255, 128, 0));
         g2.setStroke(new BasicStroke(7));
         for (int x=blockX-World.getPotentialViewDistance; x<=blockX+World.getPotentialViewDistance; x++) {
 
             for (int y=blockY-World.getPotentialViewDistance; y<=blockY+World.getPotentialViewDistance; y++) {
 
-                if (w.isVisible(x, y)) {
+                int visibility=w.isVisible(x, y);
+
+                if (visibility!=0) {
                     g2.drawImage(
                             textureLoader.getBlockTexture(w.getBlock(x, y).getType()),
                             (int) (x * blockSize + dx),
                             (int) (y * blockSize + dy),
                             blockSize, blockSize, null);
                     if (w.getBlock(x, y).hiLight) {
+                        g2.setColor(new Color(255, 128, 0));
                         g2.drawRect(
+                                (int) (x * blockSize + dx),
+                                (int) (y * blockSize + dy),
+                                blockSize, blockSize);
+                    }
+                    if (visibility==1) {
+                        g2.setColor(new Color(0, 0, 0, 128));
+                        g2.fillRect(
                                 (int) (x * blockSize + dx),
                                 (int) (y * blockSize + dy),
                                 blockSize, blockSize);
@@ -60,11 +69,15 @@ public class WorldRenderer {
 
 
         for (Unit u: w.getUnits()) {
-            g2.drawImage(
-                    textureLoader.getUnitTexture(u.getType())[((int) (u.getViewAngle() * 360 / 2 / Math.PI))],
-                    (int)((u.getX()-u.getRadius())*blockSize+dx),
-                    (int)((u.getY()-u.getRadius())*blockSize+dy),
-                    blockSize, blockSize, null);
+
+            if (w.isVisible((int)u.getX(), (int)u.getY())!=0) {
+                int diameter= (int) (blockSize*u.getRadius()*2);
+                g2.drawImage(
+                        textureLoader.getUnitTexture(u.getType())[((int) (u.getViewAngle() * 360 / 2 / Math.PI))],
+                        (int) ((u.getX() - u.getRadius()) * blockSize + dx),
+                        (int) ((u.getY() - u.getRadius()) * blockSize + dy),
+                        diameter, diameter, null);
+            }
         }
 
         g2.setColor(new Color(255, 255, 255));
@@ -72,11 +85,15 @@ public class WorldRenderer {
         for (AbstractBullet b: w.getBullets()) {
 
 
-            g2.drawLine(
-                    (int) (b.getX()* blockSize + dx),
-                    (int) (b.getY()* blockSize + dy),
-                    (int) ((b.getX()+b.getDX()*sec)* blockSize + dx),
-                    (int) ((b.getY()+ b.getDY()*sec)* blockSize + dy));
+            if (w.isVisible((int)b.getX(), (int)b.getY())!=0) {
+
+                g2.drawLine(
+                        (int) (b.getX() * blockSize + dx),
+                        (int) (b.getY() * blockSize + dy),
+                        (int) ((b.getX() + b.getDX() * sec) * blockSize + dx),
+                        (int) ((b.getY() + b.getDY() * sec) * blockSize + dy));
+
+            }
 
         }
 

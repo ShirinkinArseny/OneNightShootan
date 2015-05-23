@@ -3,10 +3,15 @@ package Shootan.Blocks;
 public class UnitBlock {
 
     private float radius;
+    private float radiusQuad;
     private float angle;
 
     public float getRadius() {
         return radius;
+    }
+
+    public float getRadiusQuad() {
+        return radiusQuad;
     }
 
     private float x;
@@ -51,10 +56,12 @@ public class UnitBlock {
 
     public UnitBlock(float x, float y, float radius) {
         this.x = x; this.y = y; this.radius = radius;
+        radiusQuad=radius*radius;
     }
     private UnitBlock(float x, float y, float radius, float angle, boolean prevDxPos, boolean prevDyPos) {
         this(x,y,radius);
         this.prevDxPos = prevDxPos; this.prevDyPos = prevDyPos;
+        radiusQuad=radius*radius;
     }
 
     public UnitBlock moveBlock(float dt, float speed) {
