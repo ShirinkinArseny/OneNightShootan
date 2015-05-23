@@ -7,13 +7,10 @@ public class Vector {
     public boolean isNormalized() {return isNormalize;}
     private float angle;
     public float getAngle() {return angle;}
-    private int intAngle;
-    public int getIntAngle() {return intAngle;}
     public Vector(float x, float y) {
         this.x = x; this.y = y;
         len = (float)Math.sqrt(x*x+y*y);
-        angle = (float)(Math.atan2(x,y)+Math.PI);
-        intAngle = (int)Math.floor(angle/2/Math.PI*360);
+        angle = (float)(Math.atan2(y,x));
     }
     public Vector(float x1, float y1, float x2, float y2) {
         this(x2-x1,y2-y1);
