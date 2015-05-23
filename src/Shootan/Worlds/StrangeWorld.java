@@ -16,13 +16,23 @@ public class StrangeWorld extends World {
     private Unit me;
     private ArrayList<Unit> units = new ArrayList<>();
     private Block[][] blocks = new Block[SIZE][SIZE];
+    private boolean[][] visibility = new boolean[SIZE][SIZE];
 
     public Block getBlock(int x, int y) {
         return blocks[y][x];
     }
 
     public boolean isVisible(int x, int y) {
-        return (x >= 0 && x < SIZE && y >= 0 && y < SIZE);
+        if (!(x >= 0 && x < SIZE && y >= 0 && y < SIZE)) return false;
+        if (Math.pow(getMe().getX()-x, 2)+Math.pow(getMe().getY()-y, 2)>100) return false;
+
+
+
+        return true;
+    }
+
+    private void updateVisibilityMap(int cameraBlockX, int cameraBlockY) {
+
     }
 
 
@@ -127,6 +137,8 @@ public class StrangeWorld extends World {
     @Override
     public void update(float deltaTime) {
 
+        int cameraBlockX=getMe().getBlockX();
+        int cameraBlockY =getMe().getBlockY();
 
         for (Unit u : units) {
             UnitBlock newBlock = u.tryMove(deltaTime);
@@ -134,6 +146,10 @@ public class StrangeWorld extends World {
                 isRightToMove(newBlock);
                 u.applyMove(newBlock);
             }
+        }
+
+        if (cameraBlockX!=getMe().getBlockX() || cameraBlockY!=getMe().getBlockY()) {
+            updateVisibilityMap(getMe().getBlockX(), getMe().getBlockY());
         }
 
         checkForNewShotings();
@@ -154,6 +170,7 @@ public class StrangeWorld extends World {
         for (int i = 0; i < SIZE; i++) {
             for (int j = 0; j < SIZE; j++) {
                 blocks[i][j] = new Brick();
+                visibility[i][j]=true;
             }
         }
 

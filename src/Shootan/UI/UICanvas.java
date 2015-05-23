@@ -104,7 +104,7 @@ public class UICanvas extends Canvas {
                 try {
                     bs = getBufferStrategy();
                     g2 = (Graphics2D) bs.getDrawGraphics();
-                    renderer.setBlockSize(Math.max(getWidth(), getHeight())*2/World.getPotentialViewDistance);
+                    renderer.setBlockSize(Math.max(getWidth(), getHeight())*3/2/World.getPotentialViewDistance);
                 } catch (NullPointerException ex) {
                     //ignore
                 }
@@ -252,7 +252,7 @@ public class UICanvas extends Canvas {
         g2.setRenderingHint(RenderingHints.KEY_TEXT_ANTIALIASING,
                 RenderingHints.VALUE_TEXT_ANTIALIAS_ON);
 
-        g2.setColor(new Color(128, 128, 128));
+        g2.setColor(new Color(0, 0, 0, 5));
         g2.fillRect(0, 0, getWidth(), getHeight());
 
 

@@ -15,7 +15,7 @@ public class Rocket extends AbstractBullet {
         for (int i=0; i<25; i++)
             bullets.add(new Flame(-1, x, y, (float) (Math.PI*2*i/25)));
         for (int i=0; i<25; i++)
-            bullets.add(new BrokenStuff(4, -1, x, y, (float) (Math.PI*2*i/25)));
+            bullets.add(new BrokenStuff(4, -1, x, y, (float) (Math.PI*2/50+Math.PI*2*i/25)));
         return bullets;
     }
 }
