@@ -28,12 +28,67 @@ public class StrangeWorld extends World {
         //if (Math.pow(getMe().getX()-x, 2)+Math.pow(getMe().getY()-y, 2)>100) return false;
 
 
+        return visibility[y][x].get();
 
-        return true;
+        //return true;
+    }
+
+
+
+    private boolean[][] visibilityIsUpdated = new boolean[SIZE][SIZE];
+
+    private void updateBlockVisibility(int cameraBlockX, int cameraBlockY, int blockX, int blockY) {
+
+        if (cameraBlockX==blockX && cameraBlockY==blockY) {
+            visibility[blockY][blockX].set(true);
+        } else if (Math.abs(cameraBlockX-blockX)<=1 && Math.abs(cameraBlockY-blockY)<=1) {
+            visibility[blockY][blockX].set(true);
+        } else {
+
+            int idx=cameraBlockX-blockX;
+            int idy=cameraBlockY-blockY;
+
+            float length= (float) Math.sqrt(idx*idx+idy*idy);
+
+            float dx=idx/length;
+            float dy=idy/length;
+
+            float x=blockX+dx;
+            float y=blockY+dy;
+
+
+
+            while ((int)x==blockX && (int)y==blockY) {
+                x+=dx;
+                y+=dy;
+            }
+
+            if (!visibilityIsUpdated[(int)y][(int)x]) {
+                updateBlockVisibility(cameraBlockX, cameraBlockY, (int)x, (int)y);
+            }
+
+            visibility[blockY][blockX].set(visibility[(int)y][(int)x].get() && !blocks[(int)y][(int)x].getIsHard());
+
+
+        }
+
+        visibilityIsUpdated[blockY][blockX]=true;
     }
 
     private void updateVisibilityMap(int cameraBlockX, int cameraBlockY) {
 
+        for (int i=Math.max(0, cameraBlockX-getPotentialViewDistance); i<Math.min(SIZE, cameraBlockX + getPotentialViewDistance); i++) {
+            for (int j=Math.max(0, cameraBlockY-getPotentialViewDistance); j<Math.min(SIZE, cameraBlockY + getPotentialViewDistance); j++) {
+                visibilityIsUpdated[j][i]=false;
+            }
+        }
+
+        for (int i=Math.max(0, cameraBlockX-getPotentialViewDistance); i<Math.min(SIZE, cameraBlockX + getPotentialViewDistance); i++) {
+            for (int j=Math.max(0, cameraBlockY-getPotentialViewDistance); j<Math.min(SIZE, cameraBlockY + getPotentialViewDistance); j++) {
+                if (!visibilityIsUpdated[j][i])
+                    updateBlockVisibility(cameraBlockX, cameraBlockY, i, j);
+            }
+        }
     }
 
 
