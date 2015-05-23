@@ -3,7 +3,6 @@ package Shootan.Worlds;
 import Shootan.Blocks.Block;
 import Shootan.Blocks.Brick;
 import Shootan.Blocks.Floor;
-import Shootan.Blocks.UnitBlock;
 import Shootan.Bullets.AbstractBullet;
 import Shootan.Units.Unit;
 
@@ -13,6 +12,7 @@ import java.util.TimerTask;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import static Shootan.Geometry.Utils.getQuadDistFromPointToLine;
+import static Shootan.Geometry.Utils.getQuadIntersectsCircle;
 
 public class StrangeWorld extends World {
 
@@ -137,30 +137,6 @@ public class StrangeWorld extends World {
         return me;
     }
 
-    private boolean possibleToMoveUnit(int x, int y) {
-        return !getBlock(x, y).getIsHard();
-    }
-
-    private ArrayList<Block> highlighted = new ArrayList<>(10);
-
-    private boolean isRightToMove(UnitBlock block) {
-        //Удаляем подсветку
-        for (Block b : highlighted)
-            b.hiLight = false;
-        highlighted.clear();
-        //Получаем все ближайшие блоки
-        int x0 = block.getBlockX();
-        int y0 = block.getBlockY();
-        for (int x = x0 - 1; x <= x0 + 2; x++)
-            for (int y = y0 - 1; y <= y0 + 2; y++)
-                if (x >= 0 && x < SIZE && y >= 0 && y < SIZE && !(x == x0 && y == y0)) {
-                    //Подсвечиваем
-                    getBlock(x, y).hiLight = true;
-                    highlighted.add(getBlock(x, y));
-                }
-        return true;
-    }
-
     private void updateBulletsCollisions(float dt) {
         ArrayList<AbstractBullet> aliveAfterUnitsBullets = new ArrayList<>(bullets.size());
         for (AbstractBullet b : bullets) {
@@ -214,7 +190,7 @@ public class StrangeWorld extends World {
                     } else {
                         bullets.add(b);
                     }
-        });
+                });
     }
 
     private void checkForNewShotings(float dt) {
@@ -232,21 +208,60 @@ public class StrangeWorld extends World {
         }
     }
 
-    @Override
-    public void update(float deltaTime) {
-
+    private void moveUnits(float deltaTime) {
         for (Unit u : units) {
-            UnitBlock newBlock = u.tryMove(deltaTime);
-            if (newBlock != null && possibleToMoveUnit(newBlock.getBlockX(), newBlock.getBlockY())) {
-                isRightToMove(newBlock);
-                u.applyMove(newBlock);
+
+            float newX=u.getX()+u.getDx()*deltaTime;
+            float newY=u.getY()+u.getDy()*deltaTime;
+
+            int fromX= (int) (newX-u.getRadius()-1);
+            int fromY= (int) (newY-u.getRadius()-1);
+            int toX= (int) (newX+u.getRadius()+1);
+            int toY= (int) (newY+u.getRadius()+1);
+
+            boolean acceptDx=true;
+            boolean acceptDy=true;
+
+            for (int i=fromX; i<toX; i++) {
+                for (int j=fromY; j<toY; j++) {
+                    if (blocks[j][i].getIsHard()) {
+
+                        if (getQuadIntersectsCircle(i, j, newX, newY, u.getRadiusQuad())) {
+
+                            if (acceptDx) {
+                                if (getQuadIntersectsCircle(i, j, newX, u.getY(), u.getRadiusQuad())) {
+                                    acceptDx = false;
+                                }
+                            }
+
+                            if (acceptDy) {
+                                if (getQuadIntersectsCircle(i, j, u.getX(), newY, u.getRadiusQuad())) {
+                                    acceptDy = false;
+                                }
+                            }
+                        }
+                        if (!acceptDx && !acceptDy) {
+                            break;
+                        }
+                    }
+                }
+                if (!acceptDx && !acceptDy) {
+                    break;
+                }
+            }
+
+            if (acceptDx || acceptDy) {
+                u.move(deltaTime, acceptDx, acceptDy);
             }
         }
+    }
 
+    @Override
+    public void update(float deltaTime) {
+        moveUnits(deltaTime);
         checkForNewShotings(deltaTime);
         updateBulletsCollisions(deltaTime);
         moveBullets(deltaTime);
-
     }
 
     public StrangeWorld(Unit me) {
@@ -266,16 +281,49 @@ public class StrangeWorld extends World {
             }
         }
 
+        for (int i = 40; i < 50; i++) {
+            for (int j = 5; j < 15; j++) {
+                blocks[i][j] = new Floor();
+            }
+        }
+
+
+        for (int i = 5; i < 15; i++) {
+            for (int j = 40; j < 50; j++) {
+                blocks[i][j] = new Floor();
+            }
+        }
+
+
+        for (int i = 40; i < 50; i++) {
+            for (int j = 40; j < 50; j++) {
+                blocks[i][j] = new Floor();
+            }
+        }
+
         for (int j = 5; j < 40; j++) {
             blocks[5][j] = new Floor();
             blocks[6][j] = new Floor();
+            blocks[7][j] = new Floor();
         }
 
         for (int j = 5; j < 40; j++) {
             blocks[j][5] = new Floor();
             blocks[j][6] = new Floor();
+            blocks[j][7] = new Floor();
         }
 
+        for (int j = 5; j < 40; j++) {
+            blocks[47][j] = new Floor();
+            blocks[48][j] = new Floor();
+            blocks[49][j] = new Floor();
+        }
+
+        for (int j = 5; j < 40  ; j++) {
+            blocks[j][47] = new Floor();
+            blocks[j][48] = new Floor();
+            blocks[j][49] = new Floor();
+        }
 
         new Timer().schedule(new TimerTask() {
             @Override

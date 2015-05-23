@@ -31,8 +31,8 @@ public class WorldRenderer {
         float dx=width/2-w.getMe().getX()*blockSize;
         float dy=height/2-w.getMe().getY()*blockSize;
 
-        int blockX=w.getMe().getBlockX();
-        int blockY=w.getMe().getBlockY();
+        int blockX= (int) w.getMe().getX();
+        int blockY= (int) w.getMe().getY();
 
         g2.setStroke(new BasicStroke(7));
         for (int x=blockX-World.getPotentialViewDistance; x<=blockX+World.getPotentialViewDistance; x++) {

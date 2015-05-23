@@ -1,32 +1,37 @@
 package Shootan.Units;
 
-import Shootan.Blocks.UnitBlock;
 import Shootan.Weapon.*;
 
 public abstract class Unit {
 
-    private float middleX;
-    private float middleY;
+    private float x;
+    private float y;
+    private float dx;
+    private float dy;
+    private float motionAngle;
+    private float radiusQuad;
+    private float radius;
 
     public long getId() {
         return id;
     }
 
     private final long id;
-    private UnitBlock block;
     private float speed;
     private float health;
     private float damageCoef;
     private long type;
 
+    private boolean isMoving=false;
+
     private Weapon weapon;
 
     public boolean isMoving() {
-        return block.isMoving();
+        return isMoving;
     }
 
     public void setIsMoving(boolean isMoving) {
-        block.setIsMoving(isMoving);
+        this.isMoving=isMoving;
     }
 
 
@@ -37,7 +42,9 @@ public abstract class Unit {
         while (motionAngle<0) {
             motionAngle+=Math.PI*2;
         }
-        block.setAngle(motionAngle);
+        dx= (float) (Math.cos(motionAngle)*speed);
+        dy= (float) (Math.sin(motionAngle)*speed);
+        this.motionAngle=motionAngle;
     }
 
     public void setViewAngle(float angle) {
@@ -53,13 +60,16 @@ public abstract class Unit {
     private float viewAngle;
 
     public float getMotionAngle() {
-        return block.getAngle();
+        return motionAngle;
     }
 
     private static long idCounter=0;
 
     public Unit(float x, float y, float radius, float speed, float damageCoef, long type) {
-        block = new UnitBlock(x,y,radius);
+        this.x=x;
+        this.y=y;
+        this.radius=radius;
+        radiusQuad=radius*radius;
         this.speed=speed;
         this.damageCoef=damageCoef;
         this.type=type;
@@ -68,34 +78,19 @@ public abstract class Unit {
         weapon=new RockerLauncher(this);
     }
 
-    public int getBlockX() {
-        return block.getBlockX();
-    }
-
-    public int getBlockY() {
-        return block.getBlockY();
-    }
-
     public float getX() {
-        return block.getX();
+        return x;
     }
 
     public float getY() {
-        return block.getY();
+        return y;
     }
 
-    public UnitBlock tryMove(float dt) {
-        return block.moveBlock(dt, speed);
-    }
-
-    public void move(float dt) {
-        UnitBlock newBlock = block.moveBlock(dt,speed);
-        if (newBlock!=null)
-            applyMove(newBlock);
-    }
-
-    public void applyMove(UnitBlock newBlock) {
-        block = newBlock;
+    public void move(float dt, boolean acceptDx, boolean acceptDy) {
+        if (isMoving) {
+            if (acceptDx) x += dt * dx;
+            if (acceptDy) y += dt * dy;
+        }
     }
 
     public float getHealth() {
@@ -110,9 +105,9 @@ public abstract class Unit {
         return type;
     }
 
-    public float getRadius() {return block.getRadius();}
+    public float getRadius() {return radius;}
 
-    public float getRadiusQuad() {return block.getRadiusQuad();}
+    public float getRadiusQuad() {return radiusQuad;}
 
     public Weapon getWeapon() {
         return weapon;
@@ -122,11 +117,11 @@ public abstract class Unit {
         return viewAngle;
     }
 
-    public float getMiddleX() {
-        return middleX;
+    public float getDx() {
+        return dx;
     }
 
-    public float getMiddleY() {
-        return middleY;
+    public float getDy() {
+        return dy;
     }
 }

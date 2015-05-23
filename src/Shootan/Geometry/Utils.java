@@ -2,7 +2,8 @@ package Shootan.Geometry;
 
 import org.junit.Test;
 
-import static org.junit.Assert.assertTrue;
+import static junit.framework.TestCase.assertFalse;
+import static junit.framework.TestCase.assertTrue;
 
 public class Utils {
 
@@ -29,6 +30,35 @@ public class Utils {
         d=getQuadDistFromPointToLine(0, 1, 1, 0, 1, 1);
         assertTrue(d>=0.45 && d<=0.55);
 
+    }
+
+    public static boolean getQuadIntersectsCircle(int quadX, int quadY,
+                                                  float circleX, float circleY,
+                                                  float radiusQuad) {
+
+        boolean quad1=radiusQuad>getQuadDistFromPointToLine(quadX, quadY, quadX+1, quadY, circleX, circleY);
+
+        boolean quad2=radiusQuad>getQuadDistFromPointToLine(quadX+1, quadY, quadX+1, quadY+1, circleX, circleY);
+
+        boolean quad3=radiusQuad>getQuadDistFromPointToLine(quadX+1, quadY+1, quadX, quadY+1, circleX, circleY);
+
+        boolean quad4=radiusQuad>getQuadDistFromPointToLine(quadX, quadY+1, quadX, quadY, circleX, circleY);
+
+        return quad1&&quad2 || quad2&&quad3 || quad3&&quad4 || quad4&&quad1;
+
+    }
+
+    @Test
+    public void testGetQuadIntersectsCircle() {
+
+
+        assertTrue(getQuadIntersectsCircle(0, 0, 2, 2, 1.1f));
+
+        assertFalse(getQuadIntersectsCircle(0, 0, 2, 2, 0.9f));
+
+        assertTrue(getQuadIntersectsCircle(1, 1, 0, 0, 1.1f));
+
+        assertFalse(getQuadIntersectsCircle(1, 1, 0, 0, 0.9f));
     }
 
 }
