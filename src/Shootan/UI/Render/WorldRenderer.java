@@ -43,13 +43,13 @@ public class WorldRenderer {
                 if (w.isVisible(x, y)) {
                     g2.drawImage(
                             textureLoader.getBlockTexture(w.getBlock(x, y).getType()),
-                            (int) (x * blockSize -blockSize/2+ dx),
-                            (int) (y * blockSize  -blockSize/2+ dy),
+                            (int) (x * blockSize + dx),
+                            (int) (y * blockSize + dy),
                             blockSize, blockSize, null);
                     if (w.getBlock(x, y).hiLight) {
                         g2.drawRect(
-                                (int) (x * blockSize  -blockSize/2+ dx),
-                                (int) (y * blockSize  -blockSize/2+ dy),
+                                (int) (x * blockSize + dx),
+                                (int) (y * blockSize + dy),
                                 blockSize, blockSize);
                     }
                 }
