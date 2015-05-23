@@ -5,13 +5,11 @@ import Shootan.Blocks.Brick;
 import Shootan.Blocks.Floor;
 import Shootan.Blocks.UnitBlock;
 import Shootan.Bullets.AbstractBullet;
-import Shootan.Geometry.Utils;
 import Shootan.Units.Unit;
 
 import java.util.ArrayList;
 import java.util.Timer;
 import java.util.TimerTask;
-import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import static Shootan.Geometry.Utils.getQuadDistFromPointToLine;
@@ -199,23 +197,24 @@ public class StrangeWorld extends World {
 
         }
         bullets.clear();
-        for (AbstractBullet b : aliveAfterUnitsBullets) {
-            if (b.getX() > 0 && b.getY() > 0) {
-                if (getHasHardBlocks(
-                        b.getBlockX(),
-                        b.getBlockY(),
-                        b.getBlockX()+b.getDX() * dt,
-                        b.getBlockY()+b.getDY() * dt)
-                        ) {
-                    ArrayList<AbstractBullet> explosion = b.explode();
-                    if (explosion != null) {
-                        bullets.addAll(explosion);
+        aliveAfterUnitsBullets
+                .stream()
+                .filter(b -> b.getX() > 0 && b.getY() > 0)
+                .forEach(b -> {
+                    if (getHasHardBlocks(
+                            b.getBlockX(),
+                            b.getBlockY(),
+                            b.getBlockX() + b.getDX() * dt,
+                            b.getBlockY() + b.getDY() * dt)
+                            ) {
+                        ArrayList<AbstractBullet> explosion = b.explode();
+                        if (explosion != null) {
+                            bullets.addAll(explosion);
+                        }
+                    } else {
+                        bullets.add(b);
                     }
-                } else {
-                    bullets.add(b);
-                }
-            }
-        }
+        });
     }
 
     private void checkForNewShotings(float dt) {
@@ -236,9 +235,6 @@ public class StrangeWorld extends World {
     @Override
     public void update(float deltaTime) {
 
-        int cameraBlockX=getMe().getBlockX();
-        int cameraBlockY =getMe().getBlockY();
-
         for (Unit u : units) {
             UnitBlock newBlock = u.tryMove(deltaTime);
             if (newBlock != null && possibleToMoveUnit(newBlock.getBlockX(), newBlock.getBlockY())) {
@@ -250,11 +246,6 @@ public class StrangeWorld extends World {
         checkForNewShotings(deltaTime);
         updateBulletsCollisions(deltaTime);
         moveBullets(deltaTime);
-
-
-
-
-
 
     }
 

@@ -16,9 +16,9 @@ public class BrokenStuff extends AbstractBullet {
     public ArrayList<AbstractBullet> explode() {
         if (pow==1) return null;
         ArrayList<AbstractBullet> res=new ArrayList<>(3);
-        res.add(new BrokenStuff(pow / 2, author, x, y, (float) (angle)));
-        res.add(new BrokenStuff(pow / 2, author, x, y, (float) (angle+Math.PI*2/3)));
-        res.add(new BrokenStuff(pow / 2, author, x, y, (float) (angle+Math.PI*2*2/3)));
+        res.add(new BrokenStuff(pow -1, author, x, y, (float) (angle)));
+        res.add(new BrokenStuff(pow -1, author, x, y, (float) (angle+Math.PI*2/3)));
+        res.add(new BrokenStuff(pow -1, author, x, y, (float) (angle+Math.PI*2*2/3)));
         return res;
     }
 }
