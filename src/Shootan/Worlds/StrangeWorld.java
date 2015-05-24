@@ -102,7 +102,34 @@ public class StrangeWorld extends World {
                 (isVisible3?1:0)+
                 (isVisible4?1:0);
 
-        if (res>=2) return 2;
+        if (res>=2) res=2;
+
+        if (res!=0) {
+
+            float myAngle = getMe().getViewAngle();
+            if (myAngle < 0) myAngle += 2 * Math.PI;
+
+            float blockAngle = (float) Math.atan2(blockY - cameraBlockY, blockX - cameraBlockX);
+            if (blockAngle < 0) blockAngle += 2 * Math.PI;
+
+            float angle = Math.abs(myAngle - blockAngle);
+            angle = (float) Math.min(angle, 2 * Math.PI - angle);
+
+            float res2;
+            if (angle < Math.PI / 3) res2 = 2;
+            else if (angle < Math.PI * 2 / 5) res2 = 1;
+            else
+                res2 = 0;
+
+            if (res2 == 0) {
+                res = 0;
+            } else {
+                if (res2 == 1) {
+                    res--;
+                }
+            }
+        }
+
         return res;
     }
 
