@@ -4,12 +4,14 @@ import Shootan.Blocks.Block;
 import Shootan.Blocks.Brick;
 import Shootan.Blocks.Floor;
 import Shootan.Bullets.AbstractBullet;
+import Shootan.Units.Human;
 import Shootan.Units.Unit;
 
 import java.util.ArrayList;
 import java.util.Timer;
 import java.util.TimerTask;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.function.BiConsumer;
 
 import static Shootan.Geometry.Utils.getQuadDistFromPointToLine;
 import static Shootan.Geometry.Utils.getQuadIntersectsCircle;
@@ -22,6 +24,7 @@ public class StrangeWorld extends World {
     private ArrayList<Unit> units = new ArrayList<>();
     private Block[][] blocks = new Block[SIZE][SIZE];
     private AtomicInteger[][] visibility = new AtomicInteger[SIZE][SIZE];
+    private BiConsumer<Unit, AbstractBullet> onKilling;
 
     public Block getBlock(int x, int y) {
         return blocks[y][x];
@@ -145,18 +148,31 @@ public class StrangeWorld extends World {
             float newX=b.getX()+b.getDX()*dt;
             float newY=b.getY()+b.getDY()*dt;
 
+            float startX=Math.min(b.getX(), newX);
+            float startY=Math.min(b.getY(), newY);
+            float endX=Math.max(b.getX(), newX);
+            float endY=Math.max(b.getY(), newY);
+
             if (alive) {
                 for (Unit u : units) {
                     if (u.getId() != b.getAuthor()) {
 
-                        if (getQuadDistFromPointToLine(b.getX(), b.getY(), newX, newY, u.getX(), u.getY())<u.getRadiusQuad()) {
-                            alive = false;
-                            u.damage(b.getDamage());
-                            ArrayList<AbstractBullet> explosion = b.explode();
-                            if (explosion != null) {
-                                aliveAfterUnitsBullets.addAll(explosion);
+                        if (u.getX()+u.getRadius()>=startX && u.getX()-u.getRadius()<=endX
+                                &&
+                                u.getY()+u.getRadius()>=startY && u.getY()-u.getRadius()<=endY
+                                ) {
+                            if (getQuadDistFromPointToLine(b.getX(), b.getY(), newX, newY, u.getX(), u.getY()) < u.getRadiusQuad()) {
+                                alive = false;
+                                u.damage(b.getDamage());
+                                if (u.getHealth()<=0) {
+                                    onKilling.accept(u, b);
+                                }
+                                ArrayList<AbstractBullet> explosion = b.explode();
+                                if (explosion != null) {
+                                    aliveAfterUnitsBullets.addAll(explosion);
+                                }
+                                break;
                             }
-                            break;
                         }
                     }
                 }
@@ -256,22 +272,41 @@ public class StrangeWorld extends World {
         }
     }
 
+    private void updateAlifeUnits() {
+
+        for (int i=0; i<units.size(); i++) {
+            if (units.get(i).getHealth()<=0) {
+
+                if (units.get(i).getId()==me.getId()) {
+                    me=new Human(10, 10);
+                    units.add(me);
+                    //RESPAWN
+                }
+
+                units.remove(i);
+            }
+        }
+
+    }
+
     @Override
     public void update(float deltaTime) {
         moveUnits(deltaTime);
         checkForNewShotings(deltaTime);
         updateBulletsCollisions(deltaTime);
         moveBullets(deltaTime);
+        updateAlifeUnits();
     }
 
-    public StrangeWorld(Unit me) {
-        this.me = me;
+    public StrangeWorld(BiConsumer<Unit, AbstractBullet> onKilling, Runnable onVisibilityMapUpdated) {
+        this.onKilling = onKilling;
+        this.me = new Human(10, 10);
         units.add(me);
 
         for (int i = 0; i < SIZE; i++) {
             for (int j = 0; j < SIZE; j++) {
                 blocks[i][j] = new Brick();
-                visibility[i][j]=new AtomicInteger(2);
+                visibility[i][j]=new AtomicInteger(0);
             }
         }
 
@@ -325,12 +360,26 @@ public class StrangeWorld extends World {
             blocks[j][49] = new Floor();
         }
 
+
         new Timer().schedule(new TimerTask() {
             @Override
             public void run() {
                 updateVisibilityMap(getMe().getX(), getMe().getY());
             }
-        }, 0, 200);
+        }, 20, 20);
+
+
+        new Thread(() -> {
+            while (true) {
+                onVisibilityMapUpdated.run();
+                try {
+                    Thread.sleep(500);
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+            }
+        }).start();
+
     }
 
 }

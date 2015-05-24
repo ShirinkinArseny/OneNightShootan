@@ -11,20 +11,15 @@ public abstract class Unit {
     private float motionAngle;
     private float radiusQuad;
     private float radius;
-
-    public long getId() {
-        return id;
-    }
-
     private final long id;
     private float speed;
     private float health;
     private float damageCoef;
     private long type;
 
-    private boolean isMoving=false;
-
     private Weapon weapon;
+
+    private boolean isMoving=false;
 
     public boolean isMoving() {
         return isMoving;
@@ -32,6 +27,10 @@ public abstract class Unit {
 
     public void setIsMoving(boolean isMoving) {
         this.isMoving=isMoving;
+    }
+
+    public long getId() {
+        return id;
     }
 
 
@@ -74,6 +73,7 @@ public abstract class Unit {
         this.damageCoef=damageCoef;
         this.type=type;
         this.id=idCounter;
+        health=1;
         idCounter++;
         weapon=new RockerLauncher(this);
     }

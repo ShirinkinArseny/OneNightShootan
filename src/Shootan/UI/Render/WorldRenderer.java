@@ -77,6 +77,22 @@ public class WorldRenderer {
                         (int) ((u.getX() - u.getRadius()) * blockSize + dx),
                         (int) ((u.getY() - u.getRadius()) * blockSize + dy),
                         diameter, diameter, null);
+
+                if (u.getHealth()>0) {
+                    g2.setStroke(new BasicStroke(1));
+                    g2.setColor(new Color(1 - u.getHealth(), u.getHealth(), 0, 0.5f));
+                    g2.fillRect((int) ((u.getX() - u.getRadius()) * blockSize + dx),
+                            (int) ((u.getY() - u.getRadius()) * blockSize + dy - 15),
+                            (int) (diameter * u.getHealth()), 10);
+
+                    g2.setColor(new Color(1 - u.getHealth(), u.getHealth(), 0));
+                    g2.drawRect((int) ((u.getX() - u.getRadius()) * blockSize + dx),
+                            (int) ((u.getY() - u.getRadius()) * blockSize + dy - 15),
+                            (int) (diameter * u.getHealth()), 10);
+                    g2.drawRect((int) ((u.getX() - u.getRadius()) * blockSize + dx),
+                            (int) ((u.getY() - u.getRadius()) * blockSize + dy - 15),
+                            (int) (diameter), 10);
+                }
             }
         }
 

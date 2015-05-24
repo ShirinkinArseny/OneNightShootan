@@ -1,7 +1,9 @@
 package Shootan.UI;
 
+import Shootan.Bullets.AbstractBullet;
 import Shootan.UI.Render.UIRender;
 import Shootan.Units.Human;
+import Shootan.Units.Unit;
 import Shootan.Worlds.StrangeWorld;
 import Shootan.Worlds.World;
 import Shootan.UI.Render.WorldRenderer;
@@ -10,6 +12,7 @@ import javax.swing.*;
 import java.awt.*;
 import java.awt.event.*;
 import java.awt.image.BufferStrategy;
+import java.util.function.BiConsumer;
 
 public class UICanvas extends Canvas {
 
@@ -144,9 +147,15 @@ public class UICanvas extends Canvas {
     private BufferStrategy bs;
     private Graphics2D g2;
 
-    private StrangeWorld world=new StrangeWorld(new Human(10, 10));
-    private WorldRenderer renderer=new WorldRenderer();
     private UIRender uiRenderer=new UIRender();
+    private WorldRenderer renderer=new WorldRenderer();
+    private StrangeWorld world=new StrangeWorld((unit, abstractBullet) -> uiRenderer.addMessage(unit + " killed by " + abstractBullet), new Runnable() {
+        @Override
+        public void run() {
+            uiRenderer.updateMap(world);
+        }
+    });
+
 
     private long lastTimeNanos=System.nanoTime();
     private float summaryTime=0;
