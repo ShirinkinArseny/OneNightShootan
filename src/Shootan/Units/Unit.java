@@ -35,24 +35,14 @@ public abstract class Unit {
 
 
     public void setMotionAngle(float motionAngle) {
-        while (motionAngle>=Math.PI*2) {
-            motionAngle-=Math.PI*2;
-        }
-        while (motionAngle<0) {
-            motionAngle+=Math.PI*2;
-        }
         dx= (float) (Math.cos(motionAngle)*speed);
         dy= (float) (Math.sin(motionAngle)*speed);
         this.motionAngle=motionAngle;
     }
 
     public void setViewAngle(float angle) {
-        while (angle>=Math.PI*2) {
-            angle-=Math.PI*2;
-        }
-        while (angle<0) {
-            angle+=Math.PI*2;
-        }
+        angle%=2*Math.PI;
+        while (angle<0) angle+=2*Math.PI;
         viewAngle=angle;
     }
 

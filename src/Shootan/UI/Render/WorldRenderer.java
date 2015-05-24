@@ -72,11 +72,12 @@ public class WorldRenderer {
 
             if (w.isVisible((int)u.getX(), (int)u.getY())!=0) {
                 int diameter= (int) (blockSize*u.getRadius()*2);
-                g2.drawImage(
-                        textureLoader.getUnitTexture(u.getType())[((int) (u.getViewAngle() * 360 / 2 / Math.PI))],
-                        (int) ((u.getX() - u.getRadius()) * blockSize + dx),
-                        (int) ((u.getY() - u.getRadius()) * blockSize + dy),
-                        diameter, diameter, null);
+                    g2.drawImage(
+                            textureLoader.getUnitTexture(u.getType())[((int) (u.getViewAngle() * 360 / 2 / Math.PI))],
+                            (int) ((u.getX() - u.getRadius()) * blockSize + dx),
+                            (int) ((u.getY() - u.getRadius()) * blockSize + dy),
+                            diameter, diameter, null);
+
 
                 if (u.getHealth()>0) {
                     g2.setStroke(new BasicStroke(1));
