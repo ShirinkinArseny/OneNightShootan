@@ -1,0 +1,58 @@
+Default request-response scheme
+
+input:
+    user id
+        2 bytes
+    state
+        viewAngle
+            2 bytes
+        isMoting
+            1 byte
+        motionAngle
+            2 bytes
+        shooting
+            1 byte
+
+
+output:
+    users
+        count of users
+            2 bytes
+        user 1
+            user id
+                2 bytes
+            user type
+                2 bytes
+            x-coord
+                int part
+                    2 bytes
+                fractional part
+                    1 byte
+            y-coord
+            health
+                1 byte
+            state
+        ...
+        user n
+    bullets
+        count of bullets
+            2 bytes
+        bullet 1
+            author id
+                2 bytes
+            bullet type
+                2 bytes
+            bullet distance
+                1 byte
+            x-coord
+                int part
+                    2 bytes
+                fractional part
+                    1 byte
+            y-coord
+        ...
+        user n
+
+
+
+

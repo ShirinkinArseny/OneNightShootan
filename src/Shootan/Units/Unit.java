@@ -4,18 +4,18 @@ import Shootan.Weapon.*;
 
 public abstract class Unit {
 
-    private float x;
-    private float y;
+    private float x;            //serializable
+    private float y;            //serializable
     private float dx;
     private float dy;
-    private float motionAngle;
+    private float motionAngle;  //serializable
     private float radiusQuad;
     private float radius;
-    private final long id;
+    private final long id;      //serializable
     private float speed;
-    private float health;
+    private float health;       //serializable
     private float damageCoef;
-    private long type;
+    private long type;          //serializable
 
     private Weapon weapon;
 
