@@ -6,8 +6,8 @@ import Shootan.Units.Unit;
 
 public class RockerLauncher extends Weapon {
 
-    public RockerLauncher() {
-        super();
+    public RockerLauncher(Unit parent) {
+        super(parent);
     }
 
     @Override

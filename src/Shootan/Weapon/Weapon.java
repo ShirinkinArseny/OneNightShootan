@@ -7,10 +7,9 @@ public abstract class Weapon {
 
     protected Unit owner;
 
-    public Weapon() {
-
+    public Weapon(Unit owner) {
+        this.owner = owner;
     }
-    public void init(Unit owner) {this.owner = owner;}
 
     protected abstract float getShotDelay();
 
