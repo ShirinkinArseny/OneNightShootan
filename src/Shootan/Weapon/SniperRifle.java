@@ -7,8 +7,8 @@ import Shootan.Units.Unit;
 
 public class SniperRifle extends Weapon {
 
-    public SniperRifle(Unit owner) {
-        super(owner);
+    public SniperRifle() {
+        super();
     }
 
     @Override

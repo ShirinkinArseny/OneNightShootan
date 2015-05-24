@@ -226,48 +226,50 @@ public class StrangeWorld extends World {
 
     private void moveUnits(float deltaTime) {
         for (Unit u : units) {
+            if (u.isMoving()) {
 
-            float newX=u.getX()+u.getDx()*deltaTime;
-            float newY=u.getY()+u.getDy()*deltaTime;
+                float newX = u.getX() + u.getDx() * deltaTime;
+                float newY = u.getY() + u.getDy() * deltaTime;
 
-            int fromX= (int) (newX-u.getRadius()-1);
-            int fromY= (int) (newY-u.getRadius()-1);
-            int toX= (int) (newX+u.getRadius()+1);
-            int toY= (int) (newY+u.getRadius()+1);
+                int fromX = (int) (newX - u.getRadius() - 1);
+                int fromY = (int) (newY - u.getRadius() - 1);
+                int toX = (int) (newX + u.getRadius() + 1);
+                int toY = (int) (newY + u.getRadius() + 1);
 
-            boolean acceptDx=true;
-            boolean acceptDy=true;
+                boolean acceptDx = true;
+                boolean acceptDy = true;
 
-            for (int i=fromX; i<toX; i++) {
-                for (int j=fromY; j<toY; j++) {
-                    if (blocks[j][i].getIsHard()) {
+                for (int i = fromX; i < toX; i++) {
+                    for (int j = fromY; j < toY; j++) {
+                        if (blocks[j][i].getIsHard()) {
 
-                        if (getQuadIntersectsCircle(i, j, newX, newY, u.getRadiusQuad())) {
+                            if (getQuadIntersectsCircle(i, j, newX, newY, u.getRadiusQuad())) {
 
-                            if (acceptDx) {
-                                if (getQuadIntersectsCircle(i, j, newX, u.getY(), u.getRadiusQuad())) {
-                                    acceptDx = false;
+                                if (acceptDx) {
+                                    if (getQuadIntersectsCircle(i, j, newX, u.getY(), u.getRadiusQuad())) {
+                                        acceptDx = false;
+                                    }
+                                }
+
+                                if (acceptDy) {
+                                    if (getQuadIntersectsCircle(i, j, u.getX(), newY, u.getRadiusQuad())) {
+                                        acceptDy = false;
+                                    }
                                 }
                             }
-
-                            if (acceptDy) {
-                                if (getQuadIntersectsCircle(i, j, u.getX(), newY, u.getRadiusQuad())) {
-                                    acceptDy = false;
-                                }
+                            if (!acceptDx && !acceptDy) {
+                                break;
                             }
-                        }
-                        if (!acceptDx && !acceptDy) {
-                            break;
                         }
                     }
+                    if (!acceptDx && !acceptDy) {
+                        break;
+                    }
                 }
-                if (!acceptDx && !acceptDy) {
-                    break;
-                }
-            }
 
-            if (acceptDx || acceptDy) {
-                u.move(deltaTime, acceptDx, acceptDy);
+                if (acceptDx || acceptDy) {
+                    u.move(deltaTime, acceptDx, acceptDy);
+                }
             }
         }
     }

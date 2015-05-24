@@ -7,8 +7,8 @@ import Shootan.Units.Unit;
 
 public class MP40 extends Weapon {
 
-    public MP40(Unit owner) {
-        super(owner);
+    public MP40() {
+        super();
     }
 
     @Override

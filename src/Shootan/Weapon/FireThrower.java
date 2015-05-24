@@ -7,8 +7,8 @@ import Shootan.Units.Unit;
 
 public class FireThrower extends Weapon {
 
-    public FireThrower(Unit owner) {
-        super(owner);
+    public FireThrower() {
+        super();
     }
 
     @Override
