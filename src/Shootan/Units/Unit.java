@@ -65,7 +65,7 @@ public abstract class Unit {
 
     private static long idCounter=0;
 
-    public Unit(float x, float y, float radius, float speed, float damageCoef, long type) {
+    public Unit(float x, float y, float radius, float speed, float damageCoef, long type, Weapon weapon) {
         this.x=x;
         this.y=y;
         this.radius=radius;
@@ -75,7 +75,8 @@ public abstract class Unit {
         this.type=type;
         this.id=idCounter;
         idCounter++;
-        weapon=new RockerLauncher(this);
+        this.weapon=weapon;
+        weapon.init(this);
     }
 
     public float getX() {
@@ -87,10 +88,8 @@ public abstract class Unit {
     }
 
     public void move(float dt, boolean acceptDx, boolean acceptDy) {
-        if (isMoving) {
-            if (acceptDx) x += dt * dx;
-            if (acceptDy) y += dt * dy;
-        }
+        if (acceptDx) x += dt * dx;
+        if (acceptDy) y += dt * dy;
     }
 
     public float getHealth() {

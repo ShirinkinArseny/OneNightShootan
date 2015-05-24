@@ -1,9 +1,11 @@
 package Shootan.Units;
 
+import Shootan.Weapon.RockerLauncher;
+
 public class Human extends Unit {
 
     public Human(float x, float y) {
-        super(x, y, 0.7f, 10f, 1, 0);
+        super(x, y, 0.7f, 10f, 1, 0, new RockerLauncher());
     }
 
 }
