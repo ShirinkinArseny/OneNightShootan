@@ -1,11 +1,11 @@
 package Shootan.Worlds;
 
 import Shootan.Blocks.Block;
-import Shootan.Bullets.AbstractBullet;
+import Shootan.Bullets.Bullet;
 import Shootan.Units.Unit;
 
 import java.util.ArrayList;
-import java.util.function.BiConsumer;
+import java.util.List;
 
 public abstract class World {
 
@@ -13,11 +13,9 @@ public abstract class World {
 
     public abstract Block getBlock(int x, int y);
 
-    public abstract ArrayList<Unit> getUnits();
+    public abstract List<Unit> getUnits();
 
-    public abstract ArrayList<AbstractBullet> getBullets();
-
-    public abstract Unit getMe();
+    public abstract List<Bullet> getBullets();
 
     public abstract void update(float deltaTime);
 

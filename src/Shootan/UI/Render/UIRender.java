@@ -1,5 +1,7 @@
 package Shootan.UI.Render;
 
+import Shootan.Blocks.Block;
+import Shootan.Worlds.ClientWorld;
 import Shootan.Worlds.StrangeWorld;
 import Shootan.Worlds.World;
 
@@ -19,17 +21,25 @@ public class UIRender {
             messages.remove(0);
     }
 
-    public void draw(Graphics2D g2, int width, int height, StrangeWorld w) {
+    public void draw(Graphics2D g2, int width, int height, ClientWorld w) {
 
+        g2.setStroke(new BasicStroke(1));
 
         int timeWidth= (int) (w.getMe().getWeapon().getTimeToNextShot()*100);
-        g2.setStroke(new BasicStroke(1));
         g2.setColor(new Color(255, 128, 0, 128));
         g2.fillRect(10, 10, timeWidth, 20);
         g2.setColor(new Color(255, 128, 0));
         g2.drawRect(10, 10, timeWidth, 20);
         g2.drawRect(10, 10, 100, 20);
+        g2.drawString(w.getMe().getWeapon().getName(), 20, 25);
 
+        g2.setColor(new Color(255, 128, 0, 128));
+        g2.fillRect(10, 40, 100, 20);
+        g2.setColor(new Color(255, 128, 0));
+        g2.drawRect(10, 40, 100, 20);
+        int inCage=w.getMe().getWeapon().getHaveBulletsInCage();
+        int total=w.getMe().getWeapon().getHaveBullets();
+        g2.drawString(inCage+"/"+(total-inCage), 20, 55);
 
         int y=height-20;
         for (int i=messages.size()-1; i>=0; i--) {
@@ -56,7 +66,7 @@ public class UIRender {
 
     }
 
-    public void updateMap(StrangeWorld world) {
+    public void updateMap(ClientWorld world) {
 
         BufferedImage map=new BufferedImage(World.getPotentialViewDistance*2, World.getPotentialViewDistance*2, BufferedImage.TYPE_INT_ARGB);
 
@@ -69,10 +79,8 @@ public class UIRender {
 
             for (int j= (int) (world.getMe().getY()-World.getPotentialViewDistance); j<world.getMe().getY()+World.getPotentialViewDistance; j++) {
 
-                int visibility=world.isVisible(i, j);
-                if (visibility==2) visibility=255; else
-                if (visibility==1) visibility=128; else
-                if (visibility==0) visibility=0;
+                Block b=world.getBlock(i, j);
+                int visibility=(b==null || b.getIsHard())?255:0;
 
 
                 g2.setColor(new Color(0, 0, 0, visibility));
@@ -80,12 +88,15 @@ public class UIRender {
 
                 y++;
             }
-
-
-
             x++;
         }
+
+
+        g2.setColor(new Color(255, 128, 0));
+        g2.fillOval(map.getWidth() / 2 - 2, map.getHeight() / 2 - 2, 4, 4);
+
         g2.dispose();
+
 
         this.map=map;
 

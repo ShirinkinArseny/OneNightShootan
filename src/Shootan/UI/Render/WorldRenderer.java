@@ -1,11 +1,13 @@
 package Shootan.UI.Render;
 
-import Shootan.Bullets.AbstractBullet;
+import Shootan.Bullets.Bullet;
 import Shootan.Units.Unit;
+import Shootan.Worlds.ClientWorld;
 import Shootan.Worlds.StrangeWorld;
 import Shootan.Worlds.World;
 
 import java.awt.*;
+import java.util.ConcurrentModificationException;
 
 public class WorldRenderer {
 
@@ -21,7 +23,7 @@ public class WorldRenderer {
         blockSize=size;
     }
 
-    private void drawBlock(Graphics2D g2, int x, int y, StrangeWorld w, float dx, float dy) {
+    private void drawBlock(Graphics2D g2, int x, int y, ClientWorld w, float dx, float dy) {
         int visibility=w.isVisible(x, y);
         if (visibility!=0) {
         g2.drawImage(
@@ -36,8 +38,15 @@ public class WorldRenderer {
                     (int) (y * blockSize + dy),
                     blockSize, blockSize);
         }
-        if (visibility == 1) {
-            g2.setColor(new Color(0, 0, 0, 128));
+        if (visibility != 4) {
+
+            switch (visibility) {
+                case 1: visibility=153; break;
+                case 2: visibility=102; break;
+                case 3: visibility=51; break;
+            }
+
+            g2.setColor(new Color(0, 0, 0, visibility));
             g2.fillRect(
                     (int) (x * blockSize + dx),
                     (int) (y * blockSize + dy),
@@ -46,7 +55,7 @@ public class WorldRenderer {
         }
     }
 
-    private void drawUnit(Graphics2D g2, StrangeWorld w, Unit u, float dx, float dy) {
+    private void drawUnit(Graphics2D g2, ClientWorld w, Unit u, float dx, float dy) {
             int diameter = (int) (blockSize * u.getRadius() * 2);
             g2.drawImage(
                     textureLoader.getUnitTexture(u.getType())[((int) (u.getViewAngle() * 360 / 2 / Math.PI))],
@@ -72,7 +81,7 @@ public class WorldRenderer {
             }
     }
 
-    private void drawBullet(Graphics2D g2, StrangeWorld w, AbstractBullet b, float dx, float dy, float time) {
+    private void drawBullet(Graphics2D g2, ClientWorld w, Bullet b, float dx, float dy, float time) {
         if (w.isVisible((int) b.getX(), (int) b.getY())!=0) {
 
             g2.drawLine(
@@ -85,38 +94,42 @@ public class WorldRenderer {
     }
 
     private long lastTimeNanos=System.nanoTime();
-    public void draw(Graphics2D g2, int width, int height, StrangeWorld w) {
+    public void draw(Graphics2D g2, int width, int height, ClientWorld w) {
 
-        long currentTimeNanos=System.nanoTime();
-        float sec= (currentTimeNanos-lastTimeNanos)/1000000000.0f;
-        lastTimeNanos=currentTimeNanos;
+        try {
+            long currentTimeNanos = System.nanoTime();
+            float sec = (currentTimeNanos - lastTimeNanos) / 1000000000.0f;
+            lastTimeNanos = currentTimeNanos;
 
-        float dx=width/2-w.getMe().getX()*blockSize;
-        float dy=height/2-w.getMe().getY()*blockSize;
+            float dx = width / 2 - w.getMe().getX() * blockSize;
+            float dy = height / 2 - w.getMe().getY() * blockSize;
 
-        int blockX= (int) w.getMe().getX();
-        int blockY= (int) w.getMe().getY();
+            int blockX = (int) w.getMe().getX();
+            int blockY = (int) w.getMe().getY();
 
-        g2.setStroke(new BasicStroke(7));
-        for (int x=blockX-World.getPotentialViewDistance; x<=blockX+World.getPotentialViewDistance; x++) {
-            for (int y=blockY-World.getPotentialViewDistance; y<=blockY+World.getPotentialViewDistance; y++) {
-                drawBlock(g2, x, y, w, dx, dy);
-            }
-        }
-
-        for (Unit u: w.getUnits()) {
-            if (u.getId()!=w.getMe().getId()) {
-                if (w.isVisible((int) u.getX(), (int) u.getY()) != 0) {
-                    drawUnit(g2, w, u, dx, dy);
+            g2.setStroke(new BasicStroke(7));
+            for (int x = blockX - World.getPotentialViewDistance; x <= blockX + World.getPotentialViewDistance; x++) {
+                for (int y = blockY - World.getPotentialViewDistance; y <= blockY + World.getPotentialViewDistance; y++) {
+                    drawBlock(g2, x, y, w, dx, dy);
                 }
             }
-        }
-        drawUnit(g2, w, w.getMe(), dx, dy);
 
-        g2.setColor(new Color(255, 255, 255));
-        g2.setStroke(new BasicStroke(3));
-        for (AbstractBullet b: w.getBullets()) {
-            drawBullet(g2, w, b, dx, dy, sec);
+            for (Unit u : w.getUnits()) {
+                if (u.getId() != w.getMe().getId()) {
+                    if (w.isVisible((int) u.getX(), (int) u.getY()) != 0) {
+                        drawUnit(g2, w, u, dx, dy);
+                    }
+                }
+            }
+            drawUnit(g2, w, w.getMe(), dx, dy);
+
+            g2.setColor(new Color(255, 255, 255));
+            g2.setStroke(new BasicStroke(3));
+            for (Bullet b : w.getBullets()) {
+                drawBullet(g2, w, b, dx, dy, sec);
+            }
+        } catch (ConcurrentModificationException e) {
+            e.printStackTrace();
         }
 
 

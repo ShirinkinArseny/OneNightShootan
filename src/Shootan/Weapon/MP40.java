@@ -1,7 +1,6 @@
 package Shootan.Weapon;
 
-import Shootan.Bullets.AbstractBullet;
-import Shootan.Bullets.Rocket;
+import Shootan.Bullets.Bullet;
 import Shootan.Bullets.SmallBullet;
 import Shootan.Units.Unit;
 
@@ -9,6 +8,31 @@ public class MP40 extends Weapon {
 
     public MP40(Unit parent) {
         super(parent);
+    }
+
+    @Override
+    public String getName() {
+        return "MP40";
+    }
+
+    @Override
+    protected int getType() {
+        return 1;
+    }
+
+    @Override
+    protected int getDefaultBulletsNumber() {
+        return 240;
+    }
+
+    @Override
+    protected int getCageSize() {
+        return 30;
+    }
+
+    @Override
+    protected float getCageReloadDelay() {
+        return 4f;
     }
 
     @Override
@@ -22,7 +46,7 @@ public class MP40 extends Weapon {
     }
 
     @Override
-    protected AbstractBullet shot() {
+    protected Bullet shot() {
         return new SmallBullet(owner.getId(), owner.getX(), owner.getY(), owner.getViewAngle());
     }
 }

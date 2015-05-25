@@ -1,10 +1,8 @@
 package Shootan.UI;
 
-import Shootan.Bullets.AbstractBullet;
+import Shootan.Network.ClientConnection;
 import Shootan.UI.Render.UIRender;
-import Shootan.Units.Human;
-import Shootan.Units.Unit;
-import Shootan.Worlds.StrangeWorld;
+import Shootan.Worlds.ClientWorld;
 import Shootan.Worlds.World;
 import Shootan.UI.Render.WorldRenderer;
 
@@ -12,7 +10,6 @@ import javax.swing.*;
 import java.awt.*;
 import java.awt.event.*;
 import java.awt.image.BufferStrategy;
-import java.util.function.BiConsumer;
 
 public class UICanvas extends Canvas {
 
@@ -75,12 +72,12 @@ public class UICanvas extends Canvas {
 
             @Override
             public void mousePressed(MouseEvent e) {
-                world.getMe().getWeapon().setWannaShot(true);
+                world.getMe().setWannaShot(true);
             }
 
             @Override
             public void mouseReleased(MouseEvent e) {
-                world.getMe().getWeapon().setWannaShot(false);
+                world.getMe().setWannaShot(false);
             }
 
             @Override
@@ -94,11 +91,14 @@ public class UICanvas extends Canvas {
             }
         });
 
-        addMouseWheelListener(new MouseWheelListener() {
-            @Override
-            public void mouseWheelMoved(MouseWheelEvent e) {
+        addMouseWheelListener(e -> {
 
+            if (e.getWheelRotation()<0) {
+                world.getMe().selectNextWeapon();
+            } else {
+                world.getMe().selectPreviousWeapon();
             }
+
         });
 
         addComponentListener(new ComponentListener() {
@@ -130,17 +130,35 @@ public class UICanvas extends Canvas {
 
             }
         });
-
     }
+
+    private ClientConnection c;
 
 
     public void start() {
         createBufferStrategy(3);
         bs = getBufferStrategy();
         g2 = (Graphics2D) bs.getDrawGraphics();
-        new Timer(10, e -> {
+        new Timer(20, e -> {
             update();
             draw();
+        }).start();
+
+        c=new ClientConnection("127.0.0.1", 1234);
+        System.out.println("Client connection created!");
+        c.setOnInputEvent(world::acceptWorldDump);
+        System.out.println("Callback setted!");
+        c.start();
+
+        new Thread(() -> {
+            while (true) {
+                c.sendMessage(world.createUnitChangedState());
+                try {
+                    Thread.sleep(20);
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+            }
         }).start();
     }
 
@@ -149,7 +167,7 @@ public class UICanvas extends Canvas {
 
     private UIRender uiRenderer=new UIRender();
     private WorldRenderer renderer=new WorldRenderer();
-    private StrangeWorld world=new StrangeWorld((unit, abstractBullet) -> uiRenderer.addMessage(unit + " killed by " + abstractBullet), new Runnable() {
+    private ClientWorld world=new ClientWorld((unit, abstractBullet) -> uiRenderer.addMessage(unit + " killed by " + abstractBullet), new Runnable() {
         @Override
         public void run() {
             uiRenderer.updateMap(world);

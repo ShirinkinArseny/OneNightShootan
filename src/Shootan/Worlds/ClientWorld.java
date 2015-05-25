@@ -6,24 +6,64 @@ import Shootan.Blocks.Floor;
 import Shootan.Bullets.Bullet;
 import Shootan.Units.Human;
 import Shootan.Units.Unit;
+import Shootan.Utils.IndexWrapper;
 
-import java.util.ArrayList;
+import java.util.*;
+import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.BiConsumer;
 
+import static Shootan.Utils.ByteUtils.booleanToByte;
+import static Shootan.Utils.ByteUtils.twoBytesToUInt;
 import static Shootan.Utils.GeometryUtils.getQuadDistFromPointToLine;
 import static Shootan.Utils.GeometryUtils.getQuadIntersectsCircle;
 
-public class StrangeWorld extends World {
+public class ClientWorld extends World {
 
     private static final int SIZE = 1000;
 
-    private Unit me;
-    private ArrayList<Unit> units = new ArrayList<>();
+    private CopyOnWriteArrayList<Unit> units = new CopyOnWriteArrayList<>();
     private Block[][] blocks = new Block[SIZE][SIZE];
     private AtomicInteger[][] visibility = new AtomicInteger[SIZE][SIZE];
     private BiConsumer<Unit, Bullet> onKilling;
+    private CopyOnWriteArrayList<Bullet> bullets = new CopyOnWriteArrayList<>();
 
+
+    public ArrayList<Byte> createUnitChangedState() {
+        return getMe().serializeState();
+    }
+
+    public void acceptWorldDump(ArrayList<Byte> data) {
+        IndexWrapper index=new IndexWrapper(0);
+        int usersNumber=twoBytesToUInt(data.get(index.value++), data.get(index.value++));
+        for (int i=0; i<usersNumber; i++) {
+
+            boolean found=false;
+            int id=twoBytesToUInt(data.get(index.value), data.get(index.value+1));
+            for (Unit u: units) {
+                if (u.getId()==id) {
+                    found=true;
+                    if (id==getMe().getId()) {
+                        u.fullDeserialiseIgnoringOpinion(data, index);
+                    } else {
+                        u.fullDeserialise(data, index);
+                    }
+                    break;
+                }
+            }
+
+            if (!found) {
+                units.add(Unit.createDeserialized(data, index));
+            }
+
+        }
+        int bulletsNumber=twoBytesToUInt(data.get(index.value++), data.get(index.value++));
+        bullets.clear();
+        for (int i=0; i<bulletsNumber; i++) {
+            bullets.add(Bullet.createDeserialized(data, index));
+        }
+
+    }
 
 
 
@@ -152,22 +192,23 @@ public class StrangeWorld extends World {
 
     }
 
-
-    private ArrayList<Bullet> bullets = new ArrayList<>();
-
     @Override
-    public ArrayList<Bullet> getBullets() {
+    public List<Bullet> getBullets() {
         return bullets;
     }
 
 
     @Override
-    public ArrayList<Unit> getUnits() {
+    public List<Unit> getUnits() {
         return units;
     }
 
+    private int index=new Random().nextInt(10);
     public Unit getMe() {
-        return me;
+        if (units.size()==0) {
+            return new Human(6, 6);
+        }
+        return units.get(index);
     }
 
     private void updateBulletsCollisions(float dt) {
@@ -261,10 +302,10 @@ public class StrangeWorld extends World {
                 float newX = u.getX() + u.getDx() * deltaTime;
                 float newY = u.getY() + u.getDy() * deltaTime;
 
-                int fromX = (int) (newX - u.getRadius() - 1);
-                int fromY = (int) (newY - u.getRadius() - 1);
-                int toX = (int) (newX + u.getRadius() + 1);
-                int toY = (int) (newY + u.getRadius() + 1);
+                int fromX = Math.max(0, (int) (newX - u.getRadius() - 1));
+                int fromY = Math.max(0, (int) (newY - u.getRadius() - 1));
+                int toX = Math.min(SIZE - 1, (int) (newX + u.getRadius() + 1));
+                int toY = Math.min(SIZE-1, (int) (newY + u.getRadius() + 1));
 
                 boolean acceptDx = true;
                 boolean acceptDy = true;
@@ -309,11 +350,9 @@ public class StrangeWorld extends World {
         for (int i=0; i<units.size(); i++) {
             if (units.get(i).getHealth()<=0) {
 
-                if (units.get(i).getId()==me.getId()) {
-                    me=new Human(10, 10);
-                    units.add(me);
-                    //RESPAWN
-                }
+                Unit u=new Human(10, 10);
+                u.setId(units.get(i).getId());
+                units.add(u);
 
                 units.remove(i);
             }
@@ -330,10 +369,8 @@ public class StrangeWorld extends World {
         updateAlifeUnits();
     }
 
-    public StrangeWorld(BiConsumer<Unit, Bullet> onKilling, Runnable onVisibilityMapUpdated) {
+    public ClientWorld(BiConsumer<Unit, Bullet> onKilling, Runnable onVisibilityMapUpdated) {
         this.onKilling = onKilling;
-        this.me = new Human(10, 10);
-        units.add(me);
 
         for (int i = 0; i < SIZE; i++) {
             for (int j = 0; j < SIZE; j++) {
@@ -393,24 +430,12 @@ public class StrangeWorld extends World {
         }
 
 
-        /*new Timer().schedule(new TimerTask() {
+        new Timer().schedule(new TimerTask() {
             @Override
             public void run() {
                 updateVisibilityMap(getMe().getX(), getMe().getY());
             }
         }, 20, 20);
-
-
-        new Thread(() -> {
-            while (true) {
-                onVisibilityMapUpdated.run();
-                try {
-                    Thread.sleep(500);
-                } catch (InterruptedException e) {
-                    e.printStackTrace();
-                }
-            }
-        }).start();*/
 
     }
 

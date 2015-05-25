@@ -1,8 +1,7 @@
 package Shootan.Weapon;
 
-import Shootan.Bullets.AbstractBullet;
+import Shootan.Bullets.Bullet;
 import Shootan.Bullets.Flame;
-import Shootan.Bullets.SmallBullet;
 import Shootan.Units.Unit;
 
 public class FireThrower extends Weapon {
@@ -12,8 +11,34 @@ public class FireThrower extends Weapon {
     }
 
     @Override
+    public String getName() {
+        return "FireThrower";
+    }
+
+    @Override
+    protected int getType() {
+        return 0;
+    }
+
+    @Override
+    protected int getCageSize() {
+        return 100;
+    }
+
+    @Override
+    protected float getCageReloadDelay() {
+        return 10f;
+    }
+
+
+    @Override
     protected float getShotDelay() {
         return 0.1f;
+    }
+
+    @Override
+    protected int getDefaultBulletsNumber() {
+        return 1000;
     }
 
     @Override
@@ -22,7 +47,7 @@ public class FireThrower extends Weapon {
     }
 
     @Override
-    protected AbstractBullet shot() {
+    protected Bullet shot() {
         return new Flame(owner.getId(), owner.getX(), owner.getY(), owner.getViewAngle());
     }
 }

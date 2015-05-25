@@ -1,4 +1,4 @@
-package Shootan.Geometry;
+package Shootan.Utils;
 
 public class Vector {
     private static final float precision = 1.0e-5f;

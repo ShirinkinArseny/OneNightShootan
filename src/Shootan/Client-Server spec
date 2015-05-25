@@ -4,6 +4,8 @@ input:
     user id
         2 bytes
     state
+        selectedWeapon
+            1 byte
         viewAngle
             2 bytes
         isMoting
@@ -27,28 +29,40 @@ output:
                 int part
                     2 bytes
                 fractional part
-                    1 byte
+                    2 byte
             y-coord
             health
-                1 byte
+                2 byte
             state
+            weapons
+                count of weapons
+                    1 bytes
+                weapon 1
+                    type
+                        2 byte
+                    cage bullets
+                        2 bytes
+                    total bullets
+                        2 bytes
+                    timeToNextShot
+                        4 byte
+                ...
+                weapon n
         ...
         user n
     bullets
         count of bullets
             2 bytes
         bullet 1
-            author id
-                2 bytes
             bullet type
                 2 bytes
+            author id
+                2 bytes
             bullet distance
-                1 byte
+                4 byte
+            bullet angle
+                2 byte
             x-coord
-                int part
-                    2 bytes
-                fractional part
-                    1 byte
             y-coord
         ...
         user n

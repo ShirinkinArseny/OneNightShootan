@@ -8,21 +8,23 @@ import Shootan.Units.Human;
 import Shootan.Units.Unit;
 
 import java.util.ArrayList;
+import java.util.List;
+import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.atomic.AtomicInteger;
-import java.util.function.BiConsumer;
 
+import static Shootan.Utils.ByteUtils.twoBytesToUInt;
+import static Shootan.Utils.ByteUtils.uIntToBytes;
 import static Shootan.Utils.GeometryUtils.getQuadDistFromPointToLine;
 import static Shootan.Utils.GeometryUtils.getQuadIntersectsCircle;
 
-public class StrangeWorld extends World {
+public class ServerWorld extends World {
 
     private static final int SIZE = 1000;
 
-    private Unit me;
-    private ArrayList<Unit> units = new ArrayList<>();
+    private CopyOnWriteArrayList<Unit> units = new CopyOnWriteArrayList<>();
     private Block[][] blocks = new Block[SIZE][SIZE];
     private AtomicInteger[][] visibility = new AtomicInteger[SIZE][SIZE];
-    private BiConsumer<Unit, Bullet> onKilling;
+    private CopyOnWriteArrayList<Bullet> bullets = new CopyOnWriteArrayList<>();
 
 
 
@@ -36,6 +38,27 @@ public class StrangeWorld extends World {
     public int isVisible(int x, int y) {
         if (!(x >= 0 && x < SIZE && y >= 0 && y < SIZE)) return 0;
         return visibility[y][x].get();
+    }
+
+    public ArrayList<Byte> createWorldDump() {
+        ArrayList<Byte> res=new ArrayList<>();
+        res.addAll(uIntToBytes(units.size()));
+        for (Unit u: units)
+            res.addAll(u.fullSerialise());
+        res.addAll(uIntToBytes(bullets.size()));
+        for (Bullet b: bullets)
+            res.addAll(b.serialize());
+        return res;
+    }
+
+    public void acceptUnitChangedState(ArrayList<Byte> data) {
+        int id=twoBytesToUInt(data.get(0), data.get(1));
+        for (Unit u: units) {
+            if (u.getId()==id) {
+                u.deserializeState(data);
+                break;
+            }
+        }
     }
 
     private boolean getHasHardBlocks(float fromX, float fromY, float toX, float toY) {
@@ -87,87 +110,15 @@ public class StrangeWorld extends World {
         return false;
     }
 
-    private int updateBlockVisibility(float cameraBlockX, float cameraBlockY, int blockX, int blockY) {
-
-
-        boolean isVisible1=!getHasHardBlocksIgnoringStart(blockX, blockY, cameraBlockX, cameraBlockY);
-
-        boolean isVisible2=!getHasHardBlocksIgnoringStart(blockX+1, blockY, cameraBlockX, cameraBlockY);
-
-        boolean isVisible3=!getHasHardBlocksIgnoringStart(blockX, blockY+1, cameraBlockX, cameraBlockY);
-
-        boolean isVisible4=!getHasHardBlocksIgnoringStart(blockX+1, blockY+1, cameraBlockX, cameraBlockY);
-
-
-        int res=
-                (isVisible1?1:0)+
-                (isVisible2?1:0)+
-                (isVisible3?1:0)+
-                (isVisible4?1:0);
-
-        //if (res>=2) res=2;
-
-        if (res!=0) {
-
-            float myAngle = getMe().getViewAngle();
-            if (myAngle < 0) myAngle += 2 * Math.PI;
-
-            float blockAngle = (float) Math.atan2(blockY - cameraBlockY, blockX - cameraBlockX);
-            if (blockAngle < 0) blockAngle += 2 * Math.PI;
-
-            float angle = Math.abs(myAngle - blockAngle);
-            angle = (float) Math.min(angle, 2 * Math.PI - angle);
-
-            int res2;
-            if (angle < Math.PI / 3) res2 = 4;
-            else if (angle < Math.PI * 2 / 5) res2 = 3;
-            else if (angle < Math.PI * 3 / 7) res2 = 2;
-            else if (angle < Math.PI * 1 / 2) res2 = 1;
-            else
-                res2 = 0;
-
-            if (res2 == 0) {
-                res = 0;
-            } else {
-                res=res2*res/4;
-            }
-        }
-
-        return res;
-    }
-
-    private void updateVisibilityMap(float cameraX, float cameraY) {
-
-        int cameraXI= (int) cameraX;
-        int cameraYI= (int) cameraY;
-
-        new Thread(() -> {
-            for (int i=Math.max(0, cameraXI-getPotentialViewDistance); i<Math.min(SIZE, cameraXI + getPotentialViewDistance); i++) {
-                for (int j=Math.max(0, cameraYI-getPotentialViewDistance); j < Math.min(SIZE, cameraYI + getPotentialViewDistance); j++) {
-                    visibility[j][i].set(updateBlockVisibility(cameraX, cameraY, i, j));
-                }
-            }
-        }).start();
-
-
-    }
-
-
-    private ArrayList<Bullet> bullets = new ArrayList<>();
-
     @Override
-    public ArrayList<Bullet> getBullets() {
+    public List<Bullet> getBullets() {
         return bullets;
     }
 
 
     @Override
-    public ArrayList<Unit> getUnits() {
+    public List<Unit> getUnits() {
         return units;
-    }
-
-    public Unit getMe() {
-        return me;
     }
 
     private void updateBulletsCollisions(float dt) {
@@ -195,7 +146,7 @@ public class StrangeWorld extends World {
                                 alive = false;
                                 u.damage(b.getDamage());
                                 if (u.getHealth()<=0) {
-                                    onKilling.accept(u, b);
+                                    //onKilling.accept(u, b);
                                 }
                                 ArrayList<Bullet> explosion = b.explode();
                                 if (explosion != null) {
@@ -309,11 +260,9 @@ public class StrangeWorld extends World {
         for (int i=0; i<units.size(); i++) {
             if (units.get(i).getHealth()<=0) {
 
-                if (units.get(i).getId()==me.getId()) {
-                    me=new Human(10, 10);
-                    units.add(me);
-                    //RESPAWN
-                }
+                Unit u=new Human(10, 10);
+                u.setId(units.get(i).getId());
+                units.add(u);
 
                 units.remove(i);
             }
@@ -330,10 +279,10 @@ public class StrangeWorld extends World {
         updateAlifeUnits();
     }
 
-    public StrangeWorld(BiConsumer<Unit, Bullet> onKilling, Runnable onVisibilityMapUpdated) {
-        this.onKilling = onKilling;
-        this.me = new Human(10, 10);
-        units.add(me);
+    public ServerWorld() {
+
+        for (int i=0; i<10; i++)
+        units.add(new Human(10, 10));
 
         for (int i = 0; i < SIZE; i++) {
             for (int j = 0; j < SIZE; j++) {
@@ -391,26 +340,6 @@ public class StrangeWorld extends World {
             blocks[j][48] = new Floor();
             blocks[j][49] = new Floor();
         }
-
-
-        /*new Timer().schedule(new TimerTask() {
-            @Override
-            public void run() {
-                updateVisibilityMap(getMe().getX(), getMe().getY());
-            }
-        }, 20, 20);
-
-
-        new Thread(() -> {
-            while (true) {
-                onVisibilityMapUpdated.run();
-                try {
-                    Thread.sleep(500);
-                } catch (InterruptedException e) {
-                    e.printStackTrace();
-                }
-            }
-        }).start();*/
 
     }
 

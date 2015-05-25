@@ -2,16 +2,25 @@ package Shootan.Bullets;
 
 import java.util.ArrayList;
 
-public class Rocket extends AbstractBullet {
+public class Rocket extends Bullet {
 
 
-    public Rocket(long author, float x, float y, float angle) {
-        super(author, x, y, angle, 0, 20f, 40f, 0.01f);
+    public Rocket() {
+        super();
+    }
+
+    public Rocket(int author, float x, float y, float angle) {
+        super(author, x, y, angle, 20f, 40f, 10f);
     }
 
     @Override
-    public ArrayList<AbstractBullet> explode() {
-        ArrayList<AbstractBullet> bullets=new ArrayList<>(50);
+    public int getType() {
+        return 3;
+    }
+
+    @Override
+    public ArrayList<Bullet> explode() {
+        ArrayList<Bullet> bullets=new ArrayList<>(50);
         for (int i=0; i<25; i++)
             bullets.add(new Flame(-1, x, y, (float) (angle+Math.PI*2*i/25)));
         for (int i=0; i<25; i++)

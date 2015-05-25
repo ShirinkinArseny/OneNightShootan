@@ -1,11 +1,11 @@
-package Shootan.Geometry;
+package Shootan.Utils;
 
 import org.junit.Test;
 
 import static junit.framework.TestCase.assertFalse;
 import static junit.framework.TestCase.assertTrue;
 
-public class Utils {
+public class GeometryUtils {
 
     public static float getQuadDistFromPointToLine(float lineX1, float lintY1, float lineX2, float lineY2, float pointX, float pointY) {
 
