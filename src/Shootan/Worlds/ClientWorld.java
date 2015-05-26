@@ -352,9 +352,9 @@ public class ClientWorld extends World {
 
                 Unit u=new Human(10, 10);
                 u.setId(units.get(i).getId());
+                units.remove(i);
                 units.add(u);
 
-                units.remove(i);
             }
         }
 
