@@ -16,7 +16,7 @@ public class ReClient {
 
         System.out.println("Connecting to 127.0.0.1");
 
-        fromserver = new Socket("127.0.0.1",4444);
+        fromserver = new Socket("127.0.0.1", 4444);
         BufferedReader in  = new
                 BufferedReader(new
                 InputStreamReader(fromserver.getInputStream()));

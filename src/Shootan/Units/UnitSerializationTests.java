@@ -16,7 +16,7 @@ public class UnitSerializationTests {
 
 
         ArrayList<Byte> serialized=u.fullSerialise();
-        Unit k=Unit.createDeserialized(serialized, new IndexWrapper(0));
+        Unit k=Unit.createDeserialized(serialized, new IndexWrapper());
 
         assertTrue(Math.abs(k.getX()-u.getX())<=0.01);
         assertTrue(Math.abs(k.getY()-u.getY())<=0.01);
@@ -43,7 +43,7 @@ public class UnitSerializationTests {
         boolean wannaShot=u.wannaShot;
 
         ArrayList<Byte> serialized=u.fullSerialise();
-        u.fullDeserialise(serialized, new IndexWrapper(0));
+        u.fullDeserialise(serialized, new IndexWrapper());
 
         assertTrue(Math.abs(x-u.getX())<=0.01);
         assertTrue(Math.abs(y-u.getY())<=0.01);

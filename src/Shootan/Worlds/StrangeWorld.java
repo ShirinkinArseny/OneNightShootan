@@ -8,34 +8,40 @@ import Shootan.Units.Human;
 import Shootan.Units.Unit;
 
 import java.util.ArrayList;
+import java.util.ConcurrentModificationException;
+import java.util.List;
+import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.atomic.AtomicInteger;
-import java.util.function.BiConsumer;
 
 import static Shootan.Utils.GeometryUtils.getQuadDistFromPointToLine;
 import static Shootan.Utils.GeometryUtils.getQuadIntersectsCircle;
 
-public class StrangeWorld extends World {
+public abstract class StrangeWorld extends World {
 
-    private static final int SIZE = 1000;
+    public static final int SIZE = 1000;
 
-    private Unit me;
-    private ArrayList<Unit> units = new ArrayList<>();
-    private Block[][] blocks = new Block[SIZE][SIZE];
-    private AtomicInteger[][] visibility = new AtomicInteger[SIZE][SIZE];
-    private BiConsumer<Unit, Bullet> onKilling;
+    protected CopyOnWriteArrayList<Unit> units = new CopyOnWriteArrayList<>();
+    protected Block[][] blocks = new Block[SIZE][SIZE];
+    protected AtomicInteger[][] visibility = new AtomicInteger[SIZE][SIZE];
+    protected CopyOnWriteArrayList<Bullet> bullets = new CopyOnWriteArrayList<>();
+
+    public abstract void onKilled(Unit killedUnit, Bullet killer);
+
+    @Override
+    public List<Bullet> getBullets() {
+        return bullets;
+    }
 
 
-
+    @Override
+    public List<Unit> getUnits() {
+        return units;
+    }
 
     public Block getBlock(int x, int y) {
         if (x>=0 && x<SIZE && y>=0 && y<=SIZE)
-        return blocks[y][x];
+            return blocks[y][x];
         return null;
-    }
-
-    public int isVisible(int x, int y) {
-        if (!(x >= 0 && x < SIZE && y >= 0 && y < SIZE)) return 0;
-        return visibility[y][x].get();
     }
 
     private boolean getHasHardBlocks(float fromX, float fromY, float toX, float toY) {
@@ -60,114 +66,6 @@ public class StrangeWorld extends World {
             y+=dy;
         }
         return false;
-    }
-
-    private boolean getHasHardBlocksIgnoringStart(float fromX, float fromY, float toX, float toY) {
-        float idx=toX-fromX;
-        float idy=toY-fromY;
-
-        float length= (float) Math.sqrt(idx*idx+idy*idy);
-
-        float dx=idx/length;
-        float dy=idy/length;
-
-        float x=fromX;
-        float y=fromY;
-
-        for (int i=0; i<length; i++) {
-
-            if (!((int)y==(int)fromY && (int)x==(int)fromX)) {
-                if (blocks[(int)y][(int)x].getIsHard())
-                    return true;
-            }
-
-            x+=dx;
-            y+=dy;
-        }
-        return false;
-    }
-
-    private int updateBlockVisibility(float cameraBlockX, float cameraBlockY, int blockX, int blockY) {
-
-
-        boolean isVisible1=!getHasHardBlocksIgnoringStart(blockX, blockY, cameraBlockX, cameraBlockY);
-
-        boolean isVisible2=!getHasHardBlocksIgnoringStart(blockX+1, blockY, cameraBlockX, cameraBlockY);
-
-        boolean isVisible3=!getHasHardBlocksIgnoringStart(blockX, blockY+1, cameraBlockX, cameraBlockY);
-
-        boolean isVisible4=!getHasHardBlocksIgnoringStart(blockX+1, blockY+1, cameraBlockX, cameraBlockY);
-
-
-        int res=
-                (isVisible1?1:0)+
-                (isVisible2?1:0)+
-                (isVisible3?1:0)+
-                (isVisible4?1:0);
-
-        //if (res>=2) res=2;
-
-        if (res!=0) {
-
-            float myAngle = getMe().getViewAngle();
-            if (myAngle < 0) myAngle += 2 * Math.PI;
-
-            float blockAngle = (float) Math.atan2(blockY - cameraBlockY, blockX - cameraBlockX);
-            if (blockAngle < 0) blockAngle += 2 * Math.PI;
-
-            float angle = Math.abs(myAngle - blockAngle);
-            angle = (float) Math.min(angle, 2 * Math.PI - angle);
-
-            int res2;
-            if (angle < Math.PI / 3) res2 = 4;
-            else if (angle < Math.PI * 2 / 5) res2 = 3;
-            else if (angle < Math.PI * 3 / 7) res2 = 2;
-            else if (angle < Math.PI * 1 / 2) res2 = 1;
-            else
-                res2 = 0;
-
-            if (res2 == 0) {
-                res = 0;
-            } else {
-                res=res2*res/4;
-            }
-        }
-
-        return res;
-    }
-
-    private void updateVisibilityMap(float cameraX, float cameraY) {
-
-        int cameraXI= (int) cameraX;
-        int cameraYI= (int) cameraY;
-
-        new Thread(() -> {
-            for (int i=Math.max(0, cameraXI-getPotentialViewDistance); i<Math.min(SIZE, cameraXI + getPotentialViewDistance); i++) {
-                for (int j=Math.max(0, cameraYI-getPotentialViewDistance); j < Math.min(SIZE, cameraYI + getPotentialViewDistance); j++) {
-                    visibility[j][i].set(updateBlockVisibility(cameraX, cameraY, i, j));
-                }
-            }
-        }).start();
-
-
-    }
-
-
-    private ArrayList<Bullet> bullets = new ArrayList<>();
-
-    @Override
-    public ArrayList<Bullet> getBullets() {
-        return bullets;
-    }
-
-
-    @Override
-    public ArrayList<Unit> getUnits() {
-        return units;
-    }
-
-    public Unit getMe() {
-        return me;
     }
 
     private void updateBulletsCollisions(float dt) {
@@ -195,7 +93,7 @@ public class StrangeWorld extends World {
                                 alive = false;
                                 u.damage(b.getDamage());
                                 if (u.getHealth()<=0) {
-                                    onKilling.accept(u, b);
+                                    onKilled(u, b);
                                 }
                                 ArrayList<Bullet> explosion = b.explode();
                                 if (explosion != null) {
@@ -239,7 +137,7 @@ public class StrangeWorld extends World {
                 });
     }
 
-    private void checkForNewShotings(float dt) {
+    protected void checkForNewShotings(float dt) {
         for (Unit u : units) {
             Bullet b = u.getWeapon().getNewBullet(dt);
             if (b != null) {
@@ -261,10 +159,10 @@ public class StrangeWorld extends World {
                 float newX = u.getX() + u.getDx() * deltaTime;
                 float newY = u.getY() + u.getDy() * deltaTime;
 
-                int fromX = (int) (newX - u.getRadius() - 1);
-                int fromY = (int) (newY - u.getRadius() - 1);
-                int toX = (int) (newX + u.getRadius() + 1);
-                int toY = (int) (newY + u.getRadius() + 1);
+                int fromX = Math.max(0, (int) (newX - u.getRadius() - 1));
+                int fromY = Math.max(0, (int) (newY - u.getRadius() - 1));
+                int toX = Math.min(SIZE - 1, (int) (newX + u.getRadius() + 1));
+                int toY = Math.min(SIZE-1, (int) (newY + u.getRadius() + 1));
 
                 boolean acceptDx = true;
                 boolean acceptDy = true;
@@ -304,21 +202,17 @@ public class StrangeWorld extends World {
         }
     }
 
-    private void updateAlifeUnits() {
+    protected void updateAlifeUnits() {
+            for (int i = 0; i < units.size(); i++) {
+                if (units.get(i).getHealth() <= 0) {
 
-        for (int i=0; i<units.size(); i++) {
-            if (units.get(i).getHealth()<=0) {
+                    Unit u = new Human(10, 10);
+                    u.setId(units.get(i).getId());
+                    units.remove(i);
+                    units.add(u);
 
-                if (units.get(i).getId()==me.getId()) {
-                    me=new Human(10, 10);
-                    units.add(me);
-                    //RESPAWN
                 }
-
-                units.remove(i);
             }
-        }
-
     }
 
     @Override
@@ -330,10 +224,9 @@ public class StrangeWorld extends World {
         updateAlifeUnits();
     }
 
-    public StrangeWorld(BiConsumer<Unit, Bullet> onKilling, Runnable onVisibilityMapUpdated) {
-        this.onKilling = onKilling;
-        this.me = new Human(10, 10);
-        units.add(me);
+    public StrangeWorld() {
+        for (int i=0; i<10; i++)
+            units.add(new Human(10, 10));
 
         for (int i = 0; i < SIZE; i++) {
             for (int j = 0; j < SIZE; j++) {
@@ -391,27 +284,6 @@ public class StrangeWorld extends World {
             blocks[j][48] = new Floor();
             blocks[j][49] = new Floor();
         }
-
-
-        /*new Timer().schedule(new TimerTask() {
-            @Override
-            public void run() {
-                updateVisibilityMap(getMe().getX(), getMe().getY());
-            }
-        }, 20, 20);
-
-
-        new Thread(() -> {
-            while (true) {
-                onVisibilityMapUpdated.run();
-                try {
-                    Thread.sleep(500);
-                } catch (InterruptedException e) {
-                    e.printStackTrace();
-                }
-            }
-        }).start();*/
-
     }
 
 }

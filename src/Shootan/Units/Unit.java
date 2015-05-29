@@ -151,6 +151,13 @@ public abstract class Unit {
         viewAngle=angle;
     }
 
+    public void changeViewAngle(float deltaAngle) {
+        float angle=this.viewAngle+deltaAngle;
+        angle%=2*Math.PI;
+        while (angle<0) angle+=2*Math.PI;
+        viewAngle=angle;
+    }
+
     float viewAngle;
 
     public float getMotionAngle() {

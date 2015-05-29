@@ -112,4 +112,8 @@ public abstract class Bullet {
     public float getDY() {
         return dy;
     }
+
+    public float getAngle() {
+        return angle;
+    }
 }

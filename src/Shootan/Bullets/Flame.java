@@ -22,7 +22,7 @@ public class Flame extends Bullet {
     public ArrayList<Bullet> explode() {
         ArrayList<Bullet> flames=new ArrayList<>(6);
         for (int i=0; i<6; i++)
-            flames.add(new SmallFlame(author, x, y, angle+(float) (Math.PI*2*((i-3)/72f))));
+            flames.add(new SmallFlame(-1, x, y, angle+(float) (Math.PI*2*((i-3)/72f))));
         return flames;
     }
 }

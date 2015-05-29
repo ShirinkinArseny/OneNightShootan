@@ -42,7 +42,7 @@ public class SniperRifle extends Weapon {
 
     @Override
     protected boolean getIsInSingleShotMode() {
-        return false;
+        return true;
     }
 
     @Override

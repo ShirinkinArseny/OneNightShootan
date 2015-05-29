@@ -25,7 +25,7 @@ public class WeaponSerializationTests {
 
         ArrayList<Byte> data=w.serialize();
 
-        Weapon copy=Weapon.createDeserialized(data, owner, new IndexWrapper(0));
+        Weapon copy=Weapon.createDeserialized(data, owner, new IndexWrapper());
         assertEquals(w.getType(), copy.getType());
         assertEquals(w.getHaveBullets(), copy.getHaveBullets());
         assertEquals(w.getHaveBulletsInCage(), copy.getHaveBulletsInCage());
@@ -39,7 +39,7 @@ public class WeaponSerializationTests {
         int haveBulletsInCage=w.haveBulletsInCage;
         int haveBullets=w.haveBullets;
         float lashShotTime=w.lashShotTime;
-        w.deserialize(data, new IndexWrapper(0));
+        w.deserialize(data, new IndexWrapper());
         assertEquals(haveBulletsInCage, w.haveBulletsInCage);
         assertEquals(haveBullets, w.haveBullets);
         assertTrue(Math.abs(lashShotTime-w.lashShotTime)<0.001f);

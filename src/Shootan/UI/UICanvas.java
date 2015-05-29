@@ -167,12 +167,7 @@ public class UICanvas extends Canvas {
 
     private UIRender uiRenderer=new UIRender();
     private WorldRenderer renderer=new WorldRenderer();
-    private ClientWorld world=new ClientWorld((unit, abstractBullet) -> uiRenderer.addMessage(unit + " killed by " + abstractBullet), new Runnable() {
-        @Override
-        public void run() {
-            uiRenderer.updateMap(world);
-        }
-    });
+    private ClientWorld world=new ClientWorld((unit, abstractBullet) -> uiRenderer.addMessage(unit + " killed by " + abstractBullet));
 
 
     private long lastTimeNanos=System.nanoTime();
