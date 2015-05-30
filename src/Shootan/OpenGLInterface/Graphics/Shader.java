@@ -6,26 +6,72 @@ import Shootan.OpenGLInterface.Util.ShaderUtils;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.CopyOnWriteArrayList;
+import java.util.stream.Stream;
 
 import static org.lwjgl.opengl.GL20.*;
 
 public class Shader {
 	public static final int VERTEX_ATTRIB = 0;
 	public static final int TEXTURE_COORDS_ATTRIB = 1;
+
+	public static final float size=20f;
+	public static final Matrix4f pr_matrix = Matrix4f.orthographic(-size, size, -size * 9.0f / 16.0f, size * 9.0f / 16.0f, -1.0f, 1.0f);
+
+	private static CopyOnWriteArrayList<Shader> allShaders=new CopyOnWriteArrayList<>();
+
+	public static Stream<Shader> getShadersStream() { return allShaders.stream(); }
+
     private int ID;
     private Map<String, Integer> locationCache = new HashMap<>();
     
     private boolean enabled = false;
 
-	public static final Shader darkableShader= new Shader("content/darkable.vert", "content/darkable.frag");
-	public static final Shader rotableShader= new Shader("content/rotable.vert", "content/rotable.frag");
-    public static final Shader defaultShader= new Shader("content/static.vert", "content/static.frag");
+	public static final Shader darkableShader =
+			new Shader("content/darkable.vert", "content/darkable.frag")
+				.acceptDefaultProjectionMatrix()
+				.bindFirstTexture()
+				.bindPositionToCamera()
+			;
+
+	public static final Shader rotableShader =
+			new Shader("content/rotable.vert", "content/rotable.frag")
+					.acceptDefaultProjectionMatrix()
+					.bindFirstTexture()
+					.bindPositionToCamera()
+			;
+
+    public static final Shader defaultShader =
+			new Shader("content/static.vert", "content/static.frag")
+					.acceptDefaultProjectionMatrix()
+					.bindFirstTexture()
+					.bindPositionToCamera()
+			;
 	
 	public Shader(String vertex, String fragment){
 		ID = ShaderUtils.loadShader(vertex, fragment);
 		System.out.println("Shader "+vertex+"+"+fragment+" binded to id "+ID);
 	}
-	
+
+	public Shader acceptDefaultProjectionMatrix() {
+		enable();
+		setUniformMat4f("pr_matrix", pr_matrix);
+		disable();
+		return this;
+	}
+
+	public Shader bindFirstTexture() {
+		enable();
+		setUniform1i("tex", 1);
+		disable();
+		return this;
+	}
+
+	public Shader bindPositionToCamera() {
+		allShaders.add(this);
+		return this;
+	}
+
 	public int getUniform(String name){
 		if (!enabled) forceEnable();
 

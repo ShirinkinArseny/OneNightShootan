@@ -47,8 +47,7 @@ public class Main implements Runnable{
 		thread.start();
 	}
 
-	public void init(){
-
+	private void initGLFW() {
 		if(glfwInit() != GL_TRUE){
 			System.err.println("GLFW initialization failed!");
 		}
@@ -83,39 +82,28 @@ public class Main implements Runnable{
 
 		glfwMakeContextCurrent(window);
 		glfwShowWindow(window);
-		
+	}
 
-		GLContext.createFromCurrent();
+	private void initOpenGL() {
+		GLContext currentContext = GLContext.createFromCurrent();
 
 		glClearColor(0f,0f,0f,1.0f);
-		
-		
+
+
 		glActiveTexture(GL_TEXTURE1);
 
 		glEnable(GL_DEPTH_TEST);
 
 		System.out.println("Supported OpenGL version: " + glGetString(GL_VERSION));
 
+
+	}
+
+	private void init(){
+
+		initGLFW();
+		initOpenGL();
 		game = new Game();
-
-		float size=20f;
-		Matrix4f pr_matrix = Matrix4f.orthographic(-size, size, -size * 9.0f / 16.0f, size * 9.0f / 16.0f, -1.0f, 1.0f);
-
-		Shader.defaultShader.enable();
-		Shader.defaultShader.setUniformMat4f("pr_matrix", pr_matrix);
-		Shader.defaultShader.setUniform1i("tex", 1);
-		Shader.defaultShader.disable();
-
-
-		Shader.rotableShader.enable();
-		Shader.rotableShader.setUniformMat4f("pr_matrix", pr_matrix);
-		Shader.rotableShader.setUniform1i("tex", 1);
-		Shader.rotableShader.disable();
-
-		Shader.darkableShader.enable();
-		Shader.darkableShader.setUniformMat4f("pr_matrix", pr_matrix);
-		Shader.darkableShader.setUniform1i("tex", 1);
-		Shader.darkableShader.disable();
 	}
 
 	private boolean lastPressed=false;
@@ -123,7 +111,7 @@ public class Main implements Runnable{
 	private double y;
 	private DoubleBuffer mouseXPosition = BufferUtils.createDoubleBuffer(1);
 	private DoubleBuffer mouseYPosition = BufferUtils.createDoubleBuffer(1);
-	public void update(float seconds){
+	private void update(float seconds){
 		glfwPollEvents();
 
 		glfwGetCursorPos(window, mouseXPosition, mouseYPosition);

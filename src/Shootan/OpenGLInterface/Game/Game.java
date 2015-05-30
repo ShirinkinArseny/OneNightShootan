@@ -56,22 +56,26 @@ public class Game {
 			}
 		}
 
-		ClientConnection c = new ClientConnection("127.0.0.1", 1234);
-		System.out.println("Client connection created!");
-		c.setOnInputEvent(world::acceptWorldDump);
-		System.out.println("Callback setted!");
-		c.start();
+		try {
+			ClientConnection c = new ClientConnection("127.0.0.1", 1234);
+			System.out.println("Client connection created!");
+			c.setOnInputEvent(world::acceptWorldDump);
+			System.out.println("Callback setted!");
+			c.start();
 
-		new Thread(() -> {
-			while (true) {
-				c.sendMessage(world.createUnitChangedState());
-				try {
-					Thread.sleep(20);
-				} catch (InterruptedException e) {
-					e.printStackTrace();
+			new Thread(() -> {
+				while (true) {
+					c.sendMessage(world.createUnitChangedState());
+					try {
+						Thread.sleep(20);
+					} catch (InterruptedException e) {
+						e.printStackTrace();
+					}
 				}
-			}
-		}).start();
+			}).start();
+		} catch (Exception e) {
+			System.err.println("Cannot connect to server, working locally...");
+		}
 
 	}
 

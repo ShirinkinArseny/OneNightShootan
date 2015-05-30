@@ -35,17 +35,12 @@ public class Camera {
 
 		Matrix4f viewMatrix=Matrix4f.rotate(rotation).multiply(Matrix4f.translate(new Vector3f(-position.x, -position.y, -position.z)));
 
-		Shader.rotableShader.enable();
-		Shader.rotableShader.setUniformMat4f("vw_matrix", viewMatrix);
-		Shader.rotableShader.disable();
+		Shader.getShadersStream().forEach(s -> {
+			s.enable();
+			s.setUniformMat4f("vw_matrix", viewMatrix);
+			s.disable();
+		});
 
-		Shader.defaultShader.enable();
-		Shader.defaultShader.setUniformMat4f("vw_matrix", viewMatrix);
-		Shader.defaultShader.disable();
-
-		Shader.darkableShader.enable();
-		Shader.darkableShader.setUniformMat4f("vw_matrix", viewMatrix);
-		Shader.darkableShader.disable();
 	}
 
 	public void setAngle(float angle) {
