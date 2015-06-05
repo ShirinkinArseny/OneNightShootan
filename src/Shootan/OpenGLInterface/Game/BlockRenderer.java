@@ -6,12 +6,10 @@ import Shootan.OpenGLInterface.Graphics.VertexArray;
 import Shootan.OpenGLInterface.Math.Matrix4f;
 
 
-public class Block {
+public class BlockRenderer {
 
 	public static float width = 1f;
 	public static float height = 1f;
-
-
 
 	private static float[] vertices = new float[]{
 			0, 0, 0.1f,
@@ -41,24 +39,20 @@ public class Block {
 	private Matrix4f position;
 	private Texture texture;
 
-	public Block(Texture texture, int x, int y) {
+	public BlockRenderer(Texture texture, int x, int y) {
 		this.texture=texture;
 		position=Matrix4f.translate(x, y, 0);
 	}
 
-	public void renderShadowed(){
-		texture.bind();
-		Shader.darkableShader.setUniformMat4f("ml_matrix", position);
-		VAO.render();
-		texture.unbind();
+	public VertexArray getVAO() {
+		return VAO;
 	}
 
 	public void render(){
 		texture.bind();
-		Shader.defaultShader.setUniformMat4f("ml_matrix", position);
+		Shader.getCurrentShader().setUniformMat4f("ml_matrix", position);
 		VAO.render();
 		texture.unbind();
 	}
-
 	
 }

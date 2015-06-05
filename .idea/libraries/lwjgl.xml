@@ -4,6 +4,8 @@
       <root url="jar://$PROJECT_DIR$/lib/lwjgl.jar!/" />
     </CLASSES>
     <JAVADOC />
-    <SOURCES />
+    <SOURCES>
+      <root url="jar://$USER_HOME$/Downloads/src.zip!/" />
+    </SOURCES>
   </library>
 </component>

@@ -13,6 +13,15 @@ uniform sampler2D tex;
 void main()
 {
 	color = texture(tex, fs_in.tc);
-	if (color.w < 1.0)
-		discard;
+	if (color.w < 1.0) {
+		color.w=1.0;
+		color.r=0.0;
+		color.g=0.0;
+		color.b=0.0;
+	} else {
+		color.w=1.0;
+		color.r=1.0;
+		color.g=1.0;
+		color.b=1.0;
+	}
 }

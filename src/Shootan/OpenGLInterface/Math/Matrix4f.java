@@ -1,15 +1,28 @@
 package Shootan.OpenGLInterface.Math;
 
 import Shootan.OpenGLInterface.Util.Utils;
+import org.lwjgl.Sys;
 
 import java.nio.FloatBuffer;
 
 public class Matrix4f {
 
+	public static final Matrix4f IDENTITY=identity();
+
 	public static final int SIZE = 4 * 4;
-	public float[] elements = new float[SIZE];
-	
-	public Matrix4f(){ }
+	private float[] elements = new float[SIZE];
+
+	private static long matricesAlive=0;
+	private static long matricesTotal=0;
+
+	public Matrix4f(){
+		matricesAlive++;
+		matricesTotal++;
+	}
+
+	public void finalize() {
+		matricesAlive--;
+	}
 	
 	public static Matrix4f identity(){
 		Matrix4f matrix = new Matrix4f();
@@ -22,8 +35,7 @@ public class Matrix4f {
 		return matrix;
 	}
 	
-	
-	// Gives us our orthographic matrix
+
 	public static Matrix4f orthographic(float left, float right, float bottom, float top, float near, float far){
 		Matrix4f matrix = new Matrix4f();
 		
@@ -48,12 +60,19 @@ public class Matrix4f {
 		return matrix;
 	}
 
-	public static Matrix4f translate(Vector3f vector){
-		Matrix4f matrix = identity();
-		matrix.elements[0 + 3 * 4] = vector.x;
-		matrix.elements[1 + 3 * 4] = vector.y;
-		matrix.elements[2 + 3 * 4] = vector.z;
-		return matrix;
+	private static Matrix4f[] rotations=new Matrix4f[1000];
+	static {
+		for (int i=0; i<1000; i++) {
+			rotations[i]=rotate((float) (2*Math.PI*i/1000));
+		}
+	}
+
+	public static Matrix4f getRotated(float angle) {
+		float normalised= (float) (angle/Math.PI/2);
+		while (normalised<0)
+			normalised++;
+		normalised%=1;
+		return rotations[((int) (normalised * 1000))];
 	}
 
 	public static Matrix4f rotate(float angle){
@@ -81,9 +100,30 @@ public class Matrix4f {
 		}
 		return result;
 	}
-	
-	public FloatBuffer toFloatBuffer(){
-		return Utils.createFloatBuffer(elements);
+
+	private FloatBuffer floatBuffer=null;
+	static long invokedTimes=0;
+	static long nonCachedTimes=0;
+	public FloatBuffer toFloatBuffer() {
+		invokedTimes++;
+		if (floatBuffer==null) {
+			nonCachedTimes++;
+			floatBuffer = Utils.createFloatBuffer(elements);
+			elements=null;
+		}
+		if (invokedTimes%1000000==0) {
+			System.out.println("Matrix.toFloatBuffer invoked "+invokedTimes+" times,\n" +
+					"	converted to FloatBuffer "+nonCachedTimes+" times\n" +
+					"	alive "+matricesAlive+" matrices\n"+
+					"	total created "+matricesTotal+" matrices");
+		}
+		return floatBuffer;
+	}
+
+	public Matrix4f clone() {
+		Matrix4f copy=new Matrix4f();
+		System.arraycopy(elements, 0, copy.elements, 0, SIZE);
+		return copy;
 	}
 	
 	

@@ -14,7 +14,7 @@ public class ServerStarter {
 
         ServerWorld w=new ServerWorld();
 
-        Server server=new Server(1234);
+        Server server=new Server(ClientConfigs.serverPort);
         server.setOnInputEvent(w::acceptUnitChangedState);
         server.start();
 

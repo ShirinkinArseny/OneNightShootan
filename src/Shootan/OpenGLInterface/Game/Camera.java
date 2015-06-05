@@ -6,44 +6,114 @@ import Shootan.OpenGLInterface.Math.Vector3f;
 
 public class Camera {
 
-	public Vector3f position = new Vector3f();
-	public Vector3f offset = new Vector3f();
-	
-	private float rotation = 0f;
+    public Vector3f position = new Vector3f();
 
-	public Vector3f getPosition() {
-		return position;
-	}
+    private float rotation = 0f;
+    private Matrix4f playerPosition = Matrix4f.identity();
+    private Matrix4f playerPositionClone = playerPosition.clone();
+    private Matrix4f playerCameraMatrix = Matrix4f.identity();
 
-	public void setPosition(float x, float y){
-		this.position.x =x;
-		this.position.y = y;
-	}
+    private void updatePlayersMatrix() {
+        playerCameraMatrix =
+                Matrix4f
+                        .getRotated(rotation)
+                        .multiply(
+                                playerPosition
+                        );
+    }
 
-	public void setPosition(Vector3f pos){
-		this.position.x = pos.x;
-		this.position.y = pos.y;
-		this.position.z = pos.z;
-	}
-	
+    public void setPosition(float x, float y) {
+        this.position.x = x;
+        this.position.y = y;
+        playerPosition = Matrix4f.translate(-position.x, -position.y, -position.z);
+        playerPositionClone=playerPosition.clone();
+        updatePlayersMatrix();
+    }
 
-	public void update(){
-	}
+    public void update() {
+    }
 
+    public static final float size = 10f;
+    public static final int intSize = (int) size;
+    public static final Matrix4f pr_matrix =
+            Matrix4f.orthographic(-size * 16 / 9, size * 16 / 9, -size, size, -1.0f, 1.0f);
 
-	public void render(){
+    public static final Matrix4f pr_matrix_1024 =
+            Matrix4f.orthographic(-size, size, size, -size, -1.0f, 1.0f);
 
-		Matrix4f viewMatrix=Matrix4f.rotate(rotation).multiply(Matrix4f.translate(new Vector3f(-position.x, -position.y, -position.z)));
+    public void lookAt(float x, float y) {
 
-		Shader.getShadersStream().forEach(s -> {
-			s.enable();
-			s.setUniformMat4f("vw_matrix", viewMatrix);
-			s.disable();
-		});
+        Matrix4f playerCameraMatrix =/*
+                Matrix4f
+                        .getRotated(rotation)
+                        .multiply(*/
+                                Matrix4f.translate(-x, -y, 0);/*
+                        );*/
 
-	}
+        Shader s = Shader.getCurrentShader();
 
-	public void setAngle(float angle) {
-		this.rotation = (float) (-angle+Math.PI/2);
-	}
+        if (s != null) {
+            s.setUniformMat4f("vw_matrix", playerCameraMatrix);
+            s.setUniformMat4f("pr_matrix", pr_matrix);
+        } else {
+            new Exception("Current shader is not selected").printStackTrace();
+        }
+
+    }
+
+    public void lookAtPlayer() {
+
+        Shader s = Shader.getCurrentShader();
+
+        if (s != null) {
+            s.setUniformMat4f("vw_matrix", playerPositionClone);
+            s.setUniformMat4f("pr_matrix", pr_matrix);
+        } else {
+            new Exception("Current shader is not selected").printStackTrace();
+        }
+
+    }
+
+    public void lookAtFBOCenter(float dx, float dy) {
+
+        Shader s = Shader.getCurrentShader();
+        if (s != null) {
+
+            Matrix4f translationMatrix = Matrix4f.translate(dx, dy, 0);
+
+            s.setUniformMat4f("vw_matrix", translationMatrix);
+            s.setUniformMat4f("pr_matrix", pr_matrix_1024);
+        } else {
+            new Exception("Current shader is not selected").printStackTrace();
+        }
+    }
+
+    public void lookAtScreenCenter() {
+
+        Shader s = Shader.getCurrentShader();
+        if (s != null) {
+            s.setUniformMat4f("vw_matrix", Matrix4f.IDENTITY);
+            s.setUniformMat4f("pr_matrix", pr_matrix);
+        } else {
+            new Exception("Current shader is not selected").printStackTrace();
+        }
+
+    }
+
+    public void lookAtFBOCenter() {
+
+        Shader s = Shader.getCurrentShader();
+        if (s != null) {
+            s.setUniformMat4f("vw_matrix", Matrix4f.IDENTITY);
+            s.setUniformMat4f("pr_matrix", pr_matrix_1024);
+        } else {
+            new Exception("Current shader is not selected").printStackTrace();
+        }
+
+    }
+
+    public void setAngle(float angle) {
+        this.rotation = (float) (-angle + Math.PI / 2);
+        updatePlayersMatrix();
+    }
 }

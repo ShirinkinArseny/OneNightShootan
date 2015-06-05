@@ -1,5 +1,6 @@
 package Shootan.UI;
 
+import Shootan.ClientConfigs;
 import Shootan.Network.ClientConnection;
 import Shootan.UI.Render.UIRender;
 import Shootan.Worlds.ClientWorld;
@@ -144,7 +145,7 @@ public class UICanvas extends Canvas {
             draw();
         }).start();
 
-        c=new ClientConnection("127.0.0.1", 1234);
+        c=new ClientConnection(ClientConfigs.serverIp, ClientConfigs.serverPort);
         System.out.println("Client connection created!");
         c.setOnInputEvent(world::acceptWorldDump);
         System.out.println("Callback setted!");

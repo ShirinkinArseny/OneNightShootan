@@ -19,14 +19,14 @@ void main()
 
 	float writeableDarkness=darkness;
 
-	float angle=abs(atan(fs_in.screenCoordinates.x, fs_in.screenCoordinates.y));
+	/*float angle=abs(atan(fs_in.screenCoordinates.x, fs_in.screenCoordinates.y));
 	if (angle>0.8) {
 		if (angle>1.2) {
 			writeableDarkness=0.0;
 		} else {
 			writeableDarkness=darkness*(1.0-(angle-0.8)*2.5);
 		}
-	}
+	}*/
 
 	//if (color.w < 1.0)
 	//	discard;

@@ -4,9 +4,10 @@ import Shootan.OpenGLInterface.Graphics.Shader;
 import Shootan.OpenGLInterface.Graphics.Texture;
 import Shootan.OpenGLInterface.Graphics.VertexArray;
 import Shootan.OpenGLInterface.Math.Matrix4f;
+import Shootan.OpenGLInterface.Math.Vector3f;
 
 
-public class BulletRenderer extends GameObject{
+public class BulletRenderer {
 
 	public static float width = 1f;
 	public static float height = 1f;
@@ -40,7 +41,6 @@ public class BulletRenderer extends GameObject{
 	}
 
 	public BulletRenderer(){
-		super(VAO, texture);
 	}
 
 	public void bind() {
@@ -51,16 +51,13 @@ public class BulletRenderer extends GameObject{
 		texture.unbind();
 	}
 
-
 	public void render(float x, float y, float angle) {
-		Shader.rotableShader.setUniformMat4f("mov_matrix", Matrix4f.translate(x, y, 0));
-		Shader.rotableShader.setUniformMat4f("rot_matrix", Matrix4f.rotate(angle));
+
+		Shader.defaultShader.setUniformMat4f("ml_matrix",
+				Matrix4f.translate(x, y, 0).multiply(Matrix4f.getRotated(angle)));
+
 		VAO.render();
-
 	}
 
-
-	public void setPosition(float x, float y) {
-		super.setPosition(x *width, y*height);
-	}
+	public Vector3f position = new Vector3f();
 }

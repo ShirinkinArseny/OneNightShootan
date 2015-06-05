@@ -4,9 +4,10 @@ import Shootan.OpenGLInterface.Graphics.Shader;
 import Shootan.OpenGLInterface.Graphics.Texture;
 import Shootan.OpenGLInterface.Graphics.VertexArray;
 import Shootan.OpenGLInterface.Math.Matrix4f;
+import Shootan.OpenGLInterface.Math.Vector3f;
 
 
-public class HumanRenderer extends GameObject{
+public class HumanRenderer {
 
 	public static float width = 1f;
 	public static float height = 1f;
@@ -40,7 +41,6 @@ public class HumanRenderer extends GameObject{
 	}
 
 	public HumanRenderer(){
-		super(VAO, texture);
 	}
 
 	public void bind() {
@@ -54,20 +54,12 @@ public class HumanRenderer extends GameObject{
 
 	public void render(float x, float y, float angle) {
 
-		//Shader.defaultShader.setUniformMat4f("ml_matrix", Matrix4f.translate(x, y, 0).multiply(Matrix4f.rotate(angle)));
+		Shader.defaultShader.setUniformMat4f("ml_matrix",
+				Matrix4f.translate(x, y, 0).multiply(Matrix4f.getRotated(angle)));
 
-		Shader.rotableShader.setUniformMat4f("mov_matrix", Matrix4f.translate(x, y, 0));
-		Shader.rotableShader.setUniformMat4f("rot_matrix", Matrix4f.rotate(angle));
-
-		//Shader.rotableShader.setUniformMat4f("ml_matrix", Matrix4f.rotate(angle).multiply(Matrix4f.translate(x, y, 0)));
 		VAO.render();
-
-		//Shader.rotableShader.setUniformMat4f("ml_matrix", Matrix4f.translate(x, y, 0).multiply(Matrix4f.rotate(angle)));
-
 	}
 
+	public Vector3f position = new Vector3f();
 
-	public void setPosition(float x, float y) {
-		super.setPosition(x *width, y*height);
-	}
 }

@@ -9,14 +9,13 @@ import java.util.Map;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.stream.Stream;
 
+import static Shootan.OpenGLInterface.Util.Utils.checkForGLError;
 import static org.lwjgl.opengl.GL20.*;
 
 public class Shader {
 	public static final int VERTEX_ATTRIB = 0;
 	public static final int TEXTURE_COORDS_ATTRIB = 1;
 
-	public static final float size=20f;
-	public static final Matrix4f pr_matrix = Matrix4f.orthographic(-size, size, -size * 9.0f / 16.0f, size * 9.0f / 16.0f, -1.0f, 1.0f);
 
 	private static CopyOnWriteArrayList<Shader> allShaders=new CopyOnWriteArrayList<>();
 
@@ -24,45 +23,93 @@ public class Shader {
 
     private int ID;
     private Map<String, Integer> locationCache = new HashMap<>();
-    
-    private boolean enabled = false;
 
 	public static final Shader darkableShader =
 			new Shader("content/darkable.vert", "content/darkable.frag")
-				.acceptDefaultProjectionMatrix()
 				.bindFirstTexture()
 				.bindPositionToCamera()
 			;
 
-	public static final Shader rotableShader =
-			new Shader("content/rotable.vert", "content/rotable.frag")
-					.acceptDefaultProjectionMatrix()
+    public static final Shader defaultShader =
+			new Shader("content/static.vert", "content/static.frag")
 					.bindFirstTexture()
 					.bindPositionToCamera()
 			;
 
-    public static final Shader defaultShader =
-			new Shader("content/static.vert", "content/static.frag")
-					.acceptDefaultProjectionMatrix()
+	public static final Shader darknessShader =
+			new Shader("content/darkness.vert", "content/darkness.frag")
 					.bindFirstTexture()
 					.bindPositionToCamera()
 			;
-	
+
+	public static final Shader rollShadows =
+			new Shader("content/lightmap/rollShadows.vert", "content/lightmap/rollShadows.frag")
+					.bindFirstTexture()
+					.bindPositionToCamera()
+			;
+
+	public static final Shader angleShadows =
+			new Shader("content/lightmap/angleShadows.vert", "content/lightmap/angleShadows.frag")
+					.bindFirstTexture()
+					.bindPositionToCamera()
+			;
+
+	public static final Shader unrollShadows =
+			new Shader("content/lightmap/unrollShadows.vert", "content/lightmap/unrollShadows.frag")
+					.bindFirstTexture()
+					.bindPositionToCamera()
+			;
+
+	public static final Shader vblur =
+			new Shader("content/blur/vblur.vert", "content/blur/blur.frag")
+					.bindFirstTexture()
+					.bindPositionToCamera()
+			;
+
+
+	public static final Shader hblur =
+			new Shader("content/blur/hblur.vert", "content/blur/blur.frag")
+					.bindFirstTexture()
+					.bindPositionToCamera()
+			;
+
+	public static final Shader multiplyColors =
+			new Shader("content/multiplyColors.vert", "content/multiplyColors.frag")
+					.bindFirstTexture()
+					.bindSecondTexture()
+					.bindPositionToCamera()
+			;
+
+	public static final Shader additiveBlend =
+			new Shader("content/additiveBlend.vert", "content/additiveBlend.frag")
+					.bindFirstTexture()
+					.bindSecondTexture()
+					.bindPositionToCamera()
+			;
+
+	private static Shader currentShader=null;
+
 	public Shader(String vertex, String fragment){
 		ID = ShaderUtils.loadShader(vertex, fragment);
+		checkForGLError();
 		System.out.println("Shader "+vertex+"+"+fragment+" binded to id "+ID);
 	}
 
-	public Shader acceptDefaultProjectionMatrix() {
+	public static Shader getCurrentShader() {
+		return currentShader;
+	}
+
+
+	public Shader bindFirstTexture() {
 		enable();
-		setUniformMat4f("pr_matrix", pr_matrix);
+		setUniform1i("tex", 0);
 		disable();
 		return this;
 	}
 
-	public Shader bindFirstTexture() {
+	public Shader bindSecondTexture() {
 		enable();
-		setUniform1i("tex", 1);
+		setUniform1i("tex2", 1);
 		disable();
 		return this;
 	}
@@ -72,60 +119,69 @@ public class Shader {
 		return this;
 	}
 
+	private static long times=0;
+	private static long sumNanos=0;
+
 	public int getUniform(String name){
-		if (!enabled) forceEnable();
+		/*if (times%10000==0) {
+			System.out.println("getUniform timing: \n" +
+					"	used "+times+" times,\n" +
+					"	totally "+sumNanos+" nanoseconds");
+		}*/
+		times++;
+		long localNano=System.nanoTime();
 
 		if (locationCache.containsKey(name)){
-			return locationCache.get(name);
+			int id=locationCache.get(name);
+			sumNanos+=System.nanoTime()-localNano;
+			return id;
 		}
 		int result = glGetUniformLocation(ID, name);
 		if(result == -1) {
-			new Exception("Could not find uniform variable'" + name + "'!").printStackTrace();
+			new Exception("Could not find uniform variable'" + name + "'!\n" +
+					"Shader id: "+ID).printStackTrace();
 			System.exit(1);
 		} else
 			locationCache.put(name, result);
-		return glGetUniformLocation(ID, name);
+
+
+		int id=locationCache.get(name);
+		sumNanos+=System.nanoTime()-localNano;
+		return id;
+
+
 	}
 
 	public void setUniform1i(String name, int value) {
-		if (!enabled) forceEnable();
+		forceEnable();
 		glUniform1i(getUniform(name), value);
 	}
 	
 	public void setUniform1f(String name, float value) {
-		if (!enabled) forceEnable();
+		forceEnable();
 		glUniform1f(getUniform(name), value);
 	}
-	
-	public void setUniform2f(String name, float x, float y) {
-		if (!enabled) forceEnable();
-		glUniform2f(getUniform(name), x, y);
-	}
-	
-	public void setUniform3f(String name, Vector3f vector) {
-		if (!enabled) forceEnable();
-		glUniform3f(getUniform(name), vector.x, vector.y, vector.z);
-	}
-	
+
 	public void setUniformMat4f(String name, Matrix4f matrix) {
-		if (!enabled) forceEnable();
+		forceEnable();
 		glUniformMatrix4fv(getUniform(name), false, matrix.toFloatBuffer());
 	}
 
 	public void forceEnable() {
-		new Exception("Force enabling shader!").printStackTrace();
-		glUseProgram(ID);
-		enabled = true;
+		if (currentShader==null || currentShader.ID!=ID) {
+			new Exception("Force enabling shader!").printStackTrace();
+			enable();
+		}
 	}
 
 	public void enable() {
 		glUseProgram(ID);
-		enabled = true;
+		currentShader=this;
 	}
 	
 	public void disable() {
 		glUseProgram(0);
-		enabled = false;
+		currentShader=null;
 	}
 
 }

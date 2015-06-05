@@ -1,6 +1,7 @@
 package Shootan.OpenGLInterface;
 
 import Shootan.OpenGLInterface.Game.Game;
+import Shootan.OpenGLInterface.Graphics.FBOTexture;
 import Shootan.OpenGLInterface.Graphics.Shader;
 import Shootan.OpenGLInterface.Input.Input;
 import Shootan.OpenGLInterface.Math.Matrix4f;
@@ -13,6 +14,7 @@ import org.lwjgl.opengl.GLContext;
 import java.nio.ByteBuffer;
 import java.nio.DoubleBuffer;
 
+import static Shootan.OpenGLInterface.Util.Utils.checkForGLError;
 import static org.lwjgl.glfw.GLFW.*;
 import static org.lwjgl.opengl.GL11.*;
 import static org.lwjgl.opengl.GL13.GL_TEXTURE1;
@@ -26,7 +28,7 @@ public class Main implements Runnable{
 	
 	private long window;
 	
-	private int width = 1200, height = 800;
+	public static final int width = 1366, height = 700;
 	
 	public Game game;
 
@@ -84,6 +86,7 @@ public class Main implements Runnable{
 		glfwShowWindow(window);
 	}
 
+
 	private void initOpenGL() {
 		GLContext currentContext = GLContext.createFromCurrent();
 
@@ -103,6 +106,7 @@ public class Main implements Runnable{
 
 		initGLFW();
 		initOpenGL();
+		checkForGLError();
 		game = new Game();
 	}
 
@@ -139,17 +143,21 @@ public class Main implements Runnable{
 		if (Input.isKeyDown(GLFW.GLFW_KEY_ESCAPE)) {
 			running=false;
 		}
-		
+
+
+
 	}
 	
 	public void render(){
+
+		glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-		
-		
+
+		glViewport(0,0,width,height);
+
 		game.render();
-		int i = glGetError();
-		if(i != GL_NO_ERROR)
-			System.out.println(i);
+
+		checkForGLError();
 
 		glfwSwapBuffers(window);
 	}
@@ -158,11 +166,21 @@ public class Main implements Runnable{
 	public void run() {
 		init();
 
+		int clock=100;
+		long sumTime=0;
 		long lastTime = System.nanoTime();
 		while (running) {
 			long now = System.nanoTime();
 			float deltaTime = (now - lastTime) / 1000000000f;
+			sumTime+=now - lastTime;
 			lastTime = now;
+
+			clock--;
+			if (clock==0) {
+				System.out.println("FPS: ~"+(100.0*1000000000.0/sumTime));
+				clock=100;
+				sumTime=0;
+			}
 
 			update(deltaTime);
 			render();
@@ -170,7 +188,8 @@ public class Main implements Runnable{
 			if (glfwWindowShouldClose(window) == GL_TRUE)
 				running = false;
 		}
-		
+
+		game.dispose();
 		keyCallback.release();
 		wheelCallback.release();
 		glfwDestroyWindow(window);

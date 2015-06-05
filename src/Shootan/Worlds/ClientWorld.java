@@ -211,17 +211,17 @@ public class ClientWorld extends StrangeWorld {
 
         for (int i=0; i<SIZE; i++) {
             for (int j=0; j <SIZE; j++) {
-                visibility[j][i].set(0);
+                visibility[j][i].set(4);
             }
         }
 
         this.onKilling = onKilling;
-        new Timer().schedule(new TimerTask() {
+        /*new Timer().schedule(new TimerTask() {
             @Override
             public void run() {
                 updateVisibilityMap(getMe().getX(), getMe().getY());
             }
-        }, 20, 20);
+        }, 20, 20);*/
     }
 
 }

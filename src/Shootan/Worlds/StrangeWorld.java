@@ -10,6 +10,7 @@ import Shootan.Units.Unit;
 import java.util.ArrayList;
 import java.util.ConcurrentModificationException;
 import java.util.List;
+import java.util.Random;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.atomic.AtomicInteger;
 
@@ -284,6 +285,16 @@ public abstract class StrangeWorld extends World {
             blocks[j][48] = new Floor();
             blocks[j][49] = new Floor();
         }
+
+        Random rnd=new Random();
+        for (int i=5; i<50; i++) {
+            for (int j=5; j<50; j++) {
+                if (rnd.nextInt(100)<96) {
+                    blocks[j][i] = new Floor();
+                }
+            }
+        }
+
     }
 
 }

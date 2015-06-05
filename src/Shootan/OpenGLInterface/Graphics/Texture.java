@@ -7,19 +7,22 @@ import java.awt.image.BufferedImage;
 import java.io.FileInputStream;
 import java.io.IOException;
 
+import static Shootan.OpenGLInterface.Util.Utils.checkForGLError;
+import static Shootan.OpenGLInterface.Util.Utils.processError;
 import static org.lwjgl.opengl.GL11.*;
 
-public class Texture {
+public class Texture extends AbstractTexture {
 
-	private int width, height;
-	private int texture;
-	
-	public Texture(String path){
-		texture = load(path);
+	public Texture(String path) {
+		super(load(path));
+		checkForGLError();
+		System.out.println(path+" loaded!");
 	}
 	
-	private int load(String path){
+	private static int load(String path){
 		int[] pixels = null;
+		int width=0;
+		int height=0;
 		try{
 			BufferedImage image = ImageIO.read(new FileInputStream(path));
 			width = image.getWidth();
@@ -27,7 +30,7 @@ public class Texture {
 			pixels = new int[width * height];
 			image.getRGB(0, 0,width, height, pixels, 0, width);
 		} catch (IOException e){
-			e.printStackTrace();
+			processError(e);
 		}
 		
 		int[] data = new int[width * height];
@@ -47,17 +50,14 @@ public class Texture {
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
 		
 		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, Utils.createIntBuffer(data));
-		
+
 		glBindTexture(GL_TEXTURE_2D, 0);
+		checkForGLError();
 		return result;
 	}
-	
-	public void bind(){
-		glBindTexture(GL_TEXTURE_2D, texture);
+
+	public void dispose() {
+		glDeleteTextures(getTextureId());
 	}
 
-	public void unbind(){
-		glBindTexture(GL_TEXTURE_2D, 0);
-	}
-	
 }
