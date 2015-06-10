@@ -48,6 +48,6 @@ public class FireThrower extends Weapon {
 
     @Override
     protected Bullet shot() {
-        return new Flame(owner.getId(), owner.getX(), owner.getY(), owner.getViewAngle());
+        return new Flame(owner.getId(), owner.getX(), owner.getY(), owner.getViewAngle(), haveBulletsInCage%6);
     }
 }

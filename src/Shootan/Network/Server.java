@@ -11,11 +11,16 @@ public class Server {
 
     private ArrayList<ServerConnection> clients;
     private Consumer<ArrayList<Byte>> event;
+    private Consumer<String> onConnected;
     private int port;
 
     public void sendMessage(ArrayList<Byte> s) {
         for (ServerConnection c: clients)
             c.sendMessage(s);
+    }
+
+    public void setOnConnectedEvent(Consumer<String> onConnected) {
+        this.onConnected=onConnected;
     }
 
     public void setOnInputEvent(Consumer<ArrayList<Byte>> r) {
@@ -42,6 +47,7 @@ public class Server {
 
                         cl.setOnCloseEvent(() -> {
                             System.out.println("[Server] Disconnected client: " + client.getInetAddress().toString());
+                            onConnected.accept(client.getInetAddress()+" disconnected");
                             clients.remove(cl);
                         });
 
@@ -52,6 +58,7 @@ public class Server {
                             e.printStackTrace();
                         }
                         System.out.println("[Server] Got client: " + client.getInetAddress());
+                        onConnected.accept(client.getInetAddress()+" connected");
                     }).start();
 
 

@@ -49,7 +49,7 @@ void main()
 
 	float reLength=(1.0-length);
 
-	sum *= reLength*reLength*reLength;
+	sum *= reLength*reLength;
 
 	color=vec4(sum*fs_in.color.r, sum*fs_in.color.g, sum*fs_in.color.b, 1.0);
 }

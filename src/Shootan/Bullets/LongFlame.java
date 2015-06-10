@@ -2,27 +2,27 @@ package Shootan.Bullets;
 
 import java.util.ArrayList;
 
-public class BigBullet extends Bullet {
+public class LongFlame extends Bullet {
 
     public boolean getIsSecondary() {
-        return false;
-    }
-
-    public boolean getHasLightning() {
         return true;
     }
 
-    private static final float[] ligtning=new float[]{0.1f, 0.1f, 0.0f};
+    public boolean getHasLightning() {
+        return hasDistance>0;
+    }
+
     public float[] getRGBLigtning() {
-        return ligtning;
+        float hasDistance=getRelatedHasDistance();
+        return new float[]{hasDistance, hasDistance*0.5f, 0f};
     }
 
-    public BigBullet() {
-        super(100f, 1000, 2f);
+    public LongFlame() {
+        super(12f, 14f, 0.1f);
     }
 
-    public BigBullet(int author, float x, float y, float angle) {
-        super(author, x, y, angle, 100f, 1000, 2f);
+    public LongFlame(int author, float x, float y, float angle) {
+        super(author, x, y, angle, 12f, 14f, 0.1f);
     }
 
     public static int type;
@@ -34,7 +34,7 @@ public class BigBullet extends Bullet {
 
     @Override
     public String getName() {
-        return "Big Bullet/Sniper rifle";
+        return "Flame/Rocket launcher";
     }
 
     @Override

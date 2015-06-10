@@ -8,16 +8,12 @@ import Shootan.Utils.IndexWrapper;
 import java.util.*;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.function.BiConsumer;
+import java.util.function.Consumer;
 
+import static Shootan.Utils.ByteUtils.booleanToByte;
 import static Shootan.Utils.ByteUtils.twoBytesToUInt;
 
 public class ClientWorld extends StrangeWorld {
-
-    private BiConsumer<Unit, Bullet> onKilling;
-
-    public void onKilled(Unit killedUnit, Bullet killer) {
-        onKilling.accept(killedUnit, killer);
-    }
 
     public ArrayList<Byte> createUnitChangedState() {
         return getMe().serializeState();
@@ -25,41 +21,83 @@ public class ClientWorld extends StrangeWorld {
 
     private CopyOnWriteArrayList<ArrayList<Byte>> dumps=new CopyOnWriteArrayList<>();
 
+    private Consumer<String> onInputMessage;
+
     private void applyLastDump() {
 
-        if (dumps.size()>0) {
-            ArrayList<Byte> data = dumps.get(dumps.size() - 1);
-            dumps.clear();
+        try {
 
-            IndexWrapper index = new IndexWrapper();
-            int usersNumber = twoBytesToUInt(data.get(index.value++), data.get(index.value++));
-            for (int i = 0; i < usersNumber; i++) {
+            if (dumps.size() > 0) {
+                ArrayList<Byte> data = dumps.get(dumps.size() - 1);
+                dumps.clear();
 
-                boolean found = false;
-                int id = twoBytesToUInt(data.get(index.value), data.get(index.value + 1));
-                for (Unit u : units) {
-                    if (u.getId() == id) {
-                        found = true;
-                        if (id == this.myId) {
-                            u.fullDeserialiseIgnoringOpinion(data, index);
-                            me = u;
-                        } else {
-                            u.fullDeserialise(data, index);
+                IndexWrapper index = new IndexWrapper();
+                int usersNumber = twoBytesToUInt(data.get(index.value++), data.get(index.value++));
+                for (int i = 0; i < usersNumber; i++) {
+
+                    boolean found = false;
+                    int id = twoBytesToUInt(data.get(index.value), data.get(index.value + 1));
+                    for (Unit u : units) {
+                        if (u.getId() == id) {
+                            found = true;
+                            if (id == this.myId) {
+                                u.fullDeserialiseIgnoringOpinion(data, index);
+                                me = u;
+                            } else {
+                                u.fullDeserialise(data, index);
+                            }
+                            break;
                         }
-                        break;
                     }
-                }
 
-                if (!found) {
-                    units.add(Unit.createDeserialized(data, index));
+                    if (!found) {
+                        units.add(Unit.createDeserialized(data, index));
+                    }
+
+                }
+                int bulletsNumber = twoBytesToUInt(data.get(index.value++), data.get(index.value++));
+
+                ArrayList<Bullet> alifeBullets = new ArrayList<>(bullets.size());
+
+                for (int i = 0; i < bulletsNumber; i++) {
+                    int id = twoBytesToUInt(data.get(index.value++), data.get(index.value++));
+                    int type = twoBytesToUInt(data.get(index.value++), data.get(index.value++));
+                    boolean found = false;
+                    for (Bullet b : bullets) {
+                        if (b.getID() == id) {
+                            if (b.getType()==type) {
+                                b.deserialize(data, index);
+                                alifeBullets.add(b);
+                                found = true;
+                            }
+                            break;
+                        }
+                    }
+
+                    if (!found) {
+                        index.value-=2;//откатываем type
+                        alifeBullets.add(Bullet.createDeserialized(data, index, id));
+                    }
+
+                }
+                bullets.clear();
+                bullets.addAll(alifeBullets);
+                alifeBullets.clear();
+
+                int messageBytesNumber = twoBytesToUInt(data.get(index.value++), data.get(index.value++));
+                if (messageBytesNumber != 0) {
+                    byte[] messageBytes = new byte[messageBytesNumber];
+                    for (int i = 0; i < messageBytesNumber; i++) {
+                        messageBytes[i] = data.get(index.value++);
+                    }
+                    String message = new String(messageBytes);
+
+                    onInputMessage.accept(message);
                 }
 
             }
-            int bulletsNumber = twoBytesToUInt(data.get(index.value++), data.get(index.value++));
-            bullets.clear();
-            for (int i = 0; i < bulletsNumber; i++) {
-                bullets.add(Bullet.createDeserialized(data, index));
-            }
+        } catch (IndexOutOfBoundsException e) {
+            e.printStackTrace();
         }
     }
 
@@ -200,7 +238,12 @@ public class ClientWorld extends StrangeWorld {
         super.update(dt);
     }
 
-    public ClientWorld(BiConsumer<Unit, Bullet> onKilling) {
+    public void setOnInputMessage(Consumer<String> onInputMessage) {
+
+        this.onInputMessage=onInputMessage;
+    }
+
+    public ClientWorld() {
         super();
         for (Unit u: units) {
             if (u.getId()==myId) {
@@ -215,13 +258,12 @@ public class ClientWorld extends StrangeWorld {
             }
         }
 
-        this.onKilling = onKilling;
-        /*new Timer().schedule(new TimerTask() {
+        new Timer().schedule(new TimerTask() {
             @Override
             public void run() {
                 updateVisibilityMap(getMe().getX(), getMe().getY());
             }
-        }, 20, 20);*/
+        }, 20, 20);
     }
 
 }

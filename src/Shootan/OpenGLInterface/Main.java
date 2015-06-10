@@ -1,10 +1,7 @@
 package Shootan.OpenGLInterface;
 
 import Shootan.OpenGLInterface.Game.Game;
-import Shootan.OpenGLInterface.Graphics.FBOTexture;
-import Shootan.OpenGLInterface.Graphics.Shader;
 import Shootan.OpenGLInterface.Input.Input;
-import Shootan.OpenGLInterface.Math.Matrix4f;
 import org.lwjgl.BufferUtils;
 import org.lwjgl.glfw.GLFW;
 import org.lwjgl.glfw.GLFWKeyCallback;
@@ -22,20 +19,19 @@ import static org.lwjgl.opengl.GL13.glActiveTexture;
 import static org.lwjgl.system.MemoryUtil.NULL;
 
 public class Main implements Runnable{
-	
-	private Thread thread;
+
 	public boolean running = true;
 	
 	private long window;
 	
-	public static final int width = 1366, height = 700;
+	public static final int width = 1366, height = 768;
 	
 	public Game game;
 
 	private GLFWKeyCallback keyCallback;
 	private GLFWScrollCallback wheelCallback;
 	
-	public static void main(String args[]){
+	public static void main(String args[]) {
 		
 		Main game = new Main();
 		game.start();
@@ -43,9 +39,9 @@ public class Main implements Runnable{
 		
 	}
 	
-	public void start(){
+	public void start() {
 		running = true;
-		thread = new Thread(this, "haha diz z thread name");
+		Thread thread = new Thread(this, "haha diz z thread name");
 		thread.start();
 	}
 
@@ -97,6 +93,8 @@ public class Main implements Runnable{
 
 		glEnable(GL_DEPTH_TEST);
 
+		glEnable(GL_BLEND);
+
 		System.out.println("Supported OpenGL version: " + glGetString(GL_VERSION));
 
 
@@ -116,6 +114,7 @@ public class Main implements Runnable{
 	private DoubleBuffer mouseXPosition = BufferUtils.createDoubleBuffer(1);
 	private DoubleBuffer mouseYPosition = BufferUtils.createDoubleBuffer(1);
 	private void update(float seconds){
+
 		glfwPollEvents();
 
 		glfwGetCursorPos(window, mouseXPosition, mouseYPosition);
@@ -166,21 +165,12 @@ public class Main implements Runnable{
 	public void run() {
 		init();
 
-		int clock=100;
-		long sumTime=0;
 		long lastTime = System.nanoTime();
 		while (running) {
+
 			long now = System.nanoTime();
 			float deltaTime = (now - lastTime) / 1000000000f;
-			sumTime+=now - lastTime;
 			lastTime = now;
-
-			clock--;
-			if (clock==0) {
-				System.out.println("FPS: ~"+(100.0*1000000000.0/sumTime));
-				clock=100;
-				sumTime=0;
-			}
 
 			update(deltaTime);
 			render();

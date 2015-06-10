@@ -16,6 +16,7 @@ public class ServerStarter {
 
         Server server=new Server(ClientConfigs.serverPort);
         server.setOnInputEvent(w::acceptUnitChangedState);
+        server.setOnConnectedEvent(w::addMessage);
         server.start();
 
         new Thread(() -> {

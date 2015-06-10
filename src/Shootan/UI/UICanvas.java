@@ -131,6 +131,8 @@ public class UICanvas extends Canvas {
 
             }
         });
+
+        world.setOnInputMessage(uiRenderer::addMessage);
     }
 
     private ClientConnection c;
@@ -168,7 +170,7 @@ public class UICanvas extends Canvas {
 
     private UIRender uiRenderer=new UIRender();
     private WorldRenderer renderer=new WorldRenderer();
-    private ClientWorld world=new ClientWorld((unit, abstractBullet) -> uiRenderer.addMessage(unit + " killed by " + abstractBullet));
+    private ClientWorld world=new ClientWorld();
 
 
     private long lastTimeNanos=System.nanoTime();

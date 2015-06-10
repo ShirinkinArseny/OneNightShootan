@@ -54,7 +54,7 @@ public class HumanRenderer {
 
 	public void render(float x, float y, float angle) {
 
-		Shader.defaultShader.setUniformMat4f("ml_matrix",
+		Shader.getCurrentShader().setUniformMat4f("ml_matrix",
 				Matrix4f.translate(x, y, 0).multiply(Matrix4f.getRotated(angle)));
 
 		VAO.render();

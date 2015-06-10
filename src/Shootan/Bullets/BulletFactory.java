@@ -3,14 +3,15 @@ package Shootan.Bullets;
 public class BulletFactory {
 
     public static Bullet create(int type) {
-        switch (type) {
-            case 0: return new BigBullet();
-            case 1: return new BrokenStuff();
-            case 2: return new Flame();
-            case 3: return new Rocket();
-            case 4: return new SmallBullet();
-            case 5: return new SmallFlame();
-        }
+
+        if (type==BigBullet.type) return new BigBullet();
+        if (type==BrokenStuff.type) return new BrokenStuff();
+        if (type==Flame.type) return new Flame();
+        if (type==Rocket.type) return new Rocket();
+        if (type==SmallBullet.type) return new SmallBullet();
+        if (type==SmallFlame.type) return new SmallFlame();
+        if (type==LongFlame.type) return new LongFlame();
+
         return null;
     }
 

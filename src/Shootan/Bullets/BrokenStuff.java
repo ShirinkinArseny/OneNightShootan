@@ -4,9 +4,16 @@ import java.util.ArrayList;
 
 public class BrokenStuff extends Bullet {
 
+    public boolean getIsSecondary() {
+        return true;
+    }
+
+    public boolean getHasLightning() {
+        return false;
+    }
 
     public BrokenStuff() {
-        super();
+        super(20f, 5, 0.4f);
     }
 
     private long pow;
@@ -16,9 +23,16 @@ public class BrokenStuff extends Bullet {
         this.pow=pow;
     }
 
+    public static int type;
+
     @Override
     public int getType() {
-        return 1;
+        return type;
+    }
+
+    @Override
+    public String getName() {
+        return "Broken stuff/Rocket launcher";
     }
 
     @Override

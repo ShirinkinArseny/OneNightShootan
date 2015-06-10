@@ -22,7 +22,7 @@ public class Camera {
                         );
     }
 
-    public void setPosition(float x, float y) {
+    public void setPlayerPosition(float x, float y) {
         this.position.x = x;
         this.position.y = y;
         playerPosition = Matrix4f.translate(-position.x, -position.y, -position.z);

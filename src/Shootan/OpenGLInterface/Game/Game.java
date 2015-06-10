@@ -1,6 +1,7 @@
 package Shootan.OpenGLInterface.Game;
 
 import Shootan.ClientConfigs;
+import Shootan.Network.ClientConnection;
 import Shootan.OpenGLInterface.Input.Input;
 import Shootan.Worlds.ClientWorld;
 import org.lwjgl.glfw.GLFW;
@@ -38,16 +39,18 @@ public class Game {
 		camera.setAngle(world.getMe().getViewAngle());
 	}
 
-	public void init(){
+	public void init() {
 
 		checkForGLError();
 
-		world=new ClientWorld(
-				(unit, abstractBullet) ->
-						System.out.println(unit + " killed by " + abstractBullet)
-		);
 
-		/*try {
+		world=new ClientWorld();
+
+		worldRender=new WorldRender(world, camera);
+
+		world.setOnInputMessage(worldRender::setMessage);
+
+		try {
 			ClientConnection c = new ClientConnection(ClientConfigs.serverIp, ClientConfigs.serverPort);
 			System.out.println("Client connection created!");
 			c.setOnInputEvent(world::acceptWorldDump);
@@ -66,10 +69,7 @@ public class Game {
 			}).start();
 		} catch (Exception e) {
 			System.err.println("Cannot connect to server, working locally...");
-		}*/
-
-
-		worldRender=new WorldRender(world, camera);
+		}
 	}
 
 	
@@ -131,7 +131,7 @@ public class Game {
 		}
 
 		if (angle >= 0) {
-			world.getMe().setMotionAngle((float) (angle+world.getMe().getViewAngle()+Math.PI/2));
+			world.getMe().setMotionAngle((float) (angle+Math.PI));
 			world.getMe().setIsMoving(true);
 		} else {
 			world.getMe().setIsMoving(false);

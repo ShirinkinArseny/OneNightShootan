@@ -1,5 +1,8 @@
 package Shootan.OpenGLInterface.Game;
 
+import Shootan.Bullets.Bullet;
+import Shootan.Bullets.Flame;
+import Shootan.Bullets.SmallFlame;
 import Shootan.OpenGLInterface.Graphics.Shader;
 import Shootan.OpenGLInterface.Graphics.Texture;
 import Shootan.OpenGLInterface.Graphics.VertexArray;
@@ -32,7 +35,9 @@ public class BulletRenderer {
 	};
 
 	private static String texPath = "content/bullet.png";
+	private static String texPathFlame = "content/flame.png";
 	private static Texture texture = new Texture(texPath);
+	private static Texture textureFlame = new Texture(texPathFlame);
 
 	private static VertexArray VAO;
 
@@ -43,20 +48,29 @@ public class BulletRenderer {
 	public BulletRenderer(){
 	}
 
-	public void bind() {
-		texture.bind();
-	}
+	public void render(Bullet bullet) {
 
-	public void unbind() {
-		texture.unbind();
-	}
+		boolean isFlame=bullet.getType()== Flame.type || bullet.getType()== SmallFlame.type;
 
-	public void render(float x, float y, float angle) {
+		if (isFlame) {
+			textureFlame.bind();
+		} else {
+			texture.bind();
+		}
 
-		Shader.defaultShader.setUniformMat4f("ml_matrix",
-				Matrix4f.translate(x, y, 0).multiply(Matrix4f.getRotated(angle)));
+
+			Shader.getCurrentShader().setUniformMat4f("ml_matrix",
+					Matrix4f.translate(bullet.getX(), bullet.getY(), 0).multiply(Matrix4f.getRotated(bullet.getAngle())));
 
 		VAO.render();
+
+
+		if (isFlame) {
+			textureFlame.unbind();
+		} else {
+			texture.unbind();
+		}
+
 	}
 
 	public Vector3f position = new Vector3f();

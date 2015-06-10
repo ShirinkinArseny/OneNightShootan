@@ -16,6 +16,7 @@ public class FBORenderer {
 			-width,  height, 0.2f,
 			width,  height, 0.2f,
 			width, -height, 0.2f
+
 	};
 
 	private static float[] texCoords = new float[]{
@@ -31,18 +32,12 @@ public class FBORenderer {
 	};
 
 	private static VertexArray VAO;
-	private static VertexArray VAO2;
 
 	static {
 		VAO = new VertexArray(vertices, indices, texCoords);
 	}
 
 	public FBORenderer() {
-	}
-
-	public void render16_9(Matrix4f position, Shader s) {
-		s.setUniformMat4f("ml_matrix", position);
-		VAO2.render();
 	}
 
 	public void render(Matrix4f position, Shader s) {

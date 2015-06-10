@@ -8,9 +8,7 @@ import Shootan.Units.Human;
 import Shootan.Units.Unit;
 
 import java.util.ArrayList;
-import java.util.ConcurrentModificationException;
 import java.util.List;
-import java.util.Random;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.atomic.AtomicInteger;
 
@@ -19,14 +17,14 @@ import static Shootan.Utils.GeometryUtils.getQuadIntersectsCircle;
 
 public abstract class StrangeWorld extends World {
 
-    public static final int SIZE = 1000;
+    public static final int SIZE = 100;
 
     protected CopyOnWriteArrayList<Unit> units = new CopyOnWriteArrayList<>();
     protected Block[][] blocks = new Block[SIZE][SIZE];
     protected AtomicInteger[][] visibility = new AtomicInteger[SIZE][SIZE];
     protected CopyOnWriteArrayList<Bullet> bullets = new CopyOnWriteArrayList<>();
 
-    public abstract void onKilled(Unit killedUnit, Bullet killer);
+    public void onKilled(Unit killedUnit, Bullet killer) {}
 
     @Override
     public List<Bullet> getBullets() {
@@ -69,22 +67,23 @@ public abstract class StrangeWorld extends World {
         return false;
     }
 
-    private void updateBulletsCollisions(float dt) {
+    protected void updateBulletsCollisions(float dt) {
         ArrayList<Bullet> aliveAfterUnitsBullets = new ArrayList<>(bullets.size());
         for (Bullet b : bullets) {
             boolean alive = !b.hasFallen();
 
-            float newX=b.getX()+b.getDX()*dt;
-            float newY=b.getY()+b.getDY()*dt;
-
-            float startX=Math.min(b.getX(), newX);
-            float startY=Math.min(b.getY(), newY);
-            float endX=Math.max(b.getX(), newX);
-            float endY=Math.max(b.getY(), newY);
-
             if (alive) {
+
+                float newX=b.getX()+b.getDX()*dt;
+                float newY=b.getY()+b.getDY()*dt;
+
+                float startX=Math.min(b.getX(), newX);
+                float startY=Math.min(b.getY(), newY);
+                float endX=Math.max(b.getX(), newX);
+                float endY=Math.max(b.getY(), newY);
+
                 for (Unit u : units) {
-                    if (u.getId() != b.getAuthor()) {
+                    if (u.getId() != b.getAuthor() || b.getIsSecondary()) {
 
                         if (u.getX()+u.getRadius()>=startX && u.getX()-u.getRadius()<=endX
                                 &&
@@ -262,6 +261,24 @@ public abstract class StrangeWorld extends World {
             }
         }
 
+        for (int i=10; i<41; i++) {
+            blocks[i-1][i-1] = new Floor();
+            blocks[i-1][i] = new Floor();
+            blocks[i-1][i+1] = new Floor();
+
+            blocks[i][i] = new Floor();
+
+            blocks[i+1][i-1] = new Floor();
+            blocks[i+1][i] = new Floor();
+            blocks[i+1][i+1] = new Floor();
+        }
+
+        for (int i=22; i<32; i++) {
+            for (int j = 22; j < 32; j++) {
+                blocks[i][j] = new Floor();
+            }
+        }
+
         for (int j = 5; j < 40; j++) {
             blocks[5][j] = new Floor();
             blocks[6][j] = new Floor();
@@ -286,14 +303,14 @@ public abstract class StrangeWorld extends World {
             blocks[j][49] = new Floor();
         }
 
-        Random rnd=new Random();
+        /*Random rnd=new Random();
         for (int i=5; i<50; i++) {
             for (int j=5; j<50; j++) {
                 if (rnd.nextInt(100)<96) {
                     blocks[j][i] = new Floor();
                 }
             }
-        }
+        }*/
 
     }
 
