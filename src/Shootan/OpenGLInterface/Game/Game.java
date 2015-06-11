@@ -32,11 +32,18 @@ public class Game {
 		if (side>0) world.getMe().selectNextWeapon(); else world.getMe().selectPreviousWeapon();
 	}
 
-	public void mouseMoved(float dx, float dy) {
-		float angle=-(float) (dx*2*Math.PI);
-		world.getMe().changeViewAngle(angle);
+	public void mouseMoved(float x, float y) {
 
-		camera.setAngle(world.getMe().getViewAngle());
+
+		float dx=x-0.5f;
+		float dy=y-0.5f;
+		float angle=0;
+		if (dx!=0 || dy!=0) {
+			angle= -(float) Math.atan2(dy, dx);
+		}
+		world.getMe().setViewAngle(angle);
+
+		worldRender.setCursor(x, y);
 	}
 
 	public void init() {

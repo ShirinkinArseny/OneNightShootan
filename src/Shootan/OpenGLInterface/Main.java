@@ -131,8 +131,8 @@ public class Main implements Runnable{
 
 		if (x-this.x!=0 || y-this.y!=0) {
 			game.mouseMoved(
-					(float)(x-this.x)/width,
-					(float)(y-this.y)/height
+					(float)(x)/width,
+					(float)(y)/height
 			);
 		}
 		this.x=x;
