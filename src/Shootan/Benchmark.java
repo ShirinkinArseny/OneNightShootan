@@ -21,7 +21,7 @@ public class Benchmark {
                     ticks = 0;
                     summaryTime = 0;
                 }
-            }, 0, 2000);
+            }, 0, 10000);
         }
     }
 

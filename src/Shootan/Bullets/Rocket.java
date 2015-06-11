@@ -40,9 +40,9 @@ public class Rocket extends Bullet {
 
     @Override
     public ArrayList<Bullet> explode() {
-        ArrayList<Bullet> bullets=new ArrayList<>(50);
-        for (int i=0; i<10; i++)
-            bullets.add(new LongFlame(author, x, y, (float) (angle+Math.PI*2*i/10)));
+        ArrayList<Bullet> bullets=new ArrayList<>(45);
+        for (int i=0; i<15; i++)
+            bullets.add(new LongFlame(author, x, y, (float) (angle+Math.PI*2*i/15)));
         for (int i=0; i<30; i++)
             bullets.add(new BrokenStuff(4, author, x, y, (float) (angle+Math.PI*2/30+Math.PI*2*i/30)));
         return bullets;

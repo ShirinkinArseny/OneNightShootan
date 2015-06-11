@@ -3,9 +3,7 @@ package Shootan.OpenGLInterface;
 import Shootan.OpenGLInterface.Game.Game;
 import Shootan.OpenGLInterface.Input.Input;
 import org.lwjgl.BufferUtils;
-import org.lwjgl.glfw.GLFW;
-import org.lwjgl.glfw.GLFWKeyCallback;
-import org.lwjgl.glfw.GLFWScrollCallback;
+import org.lwjgl.glfw.*;
 import org.lwjgl.opengl.GLContext;
 
 import java.nio.ByteBuffer;
@@ -49,6 +47,9 @@ public class Main implements Runnable{
 		if(glfwInit() != GL_TRUE){
 			System.err.println("GLFW initialization failed!");
 		}
+
+		GLFWErrorCallback errorCallback = Callbacks.errorCallbackPrint();
+		glfwSetErrorCallback(errorCallback);
 
 		glfwWindowHint(GLFW_RESIZABLE, GL_TRUE);
 

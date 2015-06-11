@@ -25,7 +25,7 @@ public class BlockRenderer {
 			1, 1
 	};
 
-	private static byte[] indices = new byte[]{
+	private static int[] indices = new int[]{
 			0,1,2,
 			2,3,0
 	};
@@ -44,13 +44,14 @@ public class BlockRenderer {
 		position=Matrix4f.translate(x, y, 0);
 	}
 
-	public VertexArray getVAO() {
-		return VAO;
+	public void renderWithoutBinding(){
+		Shader.getCurrentShader().setUniformMat4f(Shader.getCurrentShader().modelMatrixUniformId, position);
+		VAO.render();
 	}
 
 	public void render(){
 		texture.bind();
-		Shader.getCurrentShader().setUniformMat4f("ml_matrix", position);
+		Shader.getCurrentShader().setUniformMat4f(Shader.getCurrentShader().modelMatrixUniformId, position);
 		VAO.render();
 		texture.unbind();
 	}

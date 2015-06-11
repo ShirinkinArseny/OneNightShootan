@@ -26,7 +26,7 @@ public class FBORenderer {
 			1, 1
 	};
 
-	private static byte[] indices = new byte[]{
+	private static int[] indices = new int[]{
 			0,1,2,
 			2,3,0
 	};
@@ -41,12 +41,12 @@ public class FBORenderer {
 	}
 
 	public void render(Matrix4f position, Shader s) {
-		s.setUniformMat4f("ml_matrix", position);
+		s.setUniformMat4f(s.modelMatrixUniformId, position);
 		VAO.render();
 	}
 
 		public void render(float x, float y, Shader s) {
-		s.setUniformMat4f("ml_matrix", Matrix4f.translate(x, y, 0));
+		s.setUniformMat4f(s.modelMatrixUniformId, Matrix4f.translate(x, y, 0));
 		VAO.render();
 	}
 

@@ -45,8 +45,9 @@ public class WorldRender {
 
     private FontRenderer fontRenderer;
 
-    private static final int fboWidth = 1024;
-    private static final int fboHeight = 1024;
+    private MapRenderer mapRenderer;
+
+    private static final int fboSize = 1024;
     private String message="Game had been started!";
 
     public WorldRender(ClientWorld world, Camera camera) {
@@ -62,25 +63,27 @@ public class WorldRender {
             }
         }
 
-        scene=new FBOTexture(fboWidth, fboHeight);
+        scene=new FBOTexture(fboSize, fboSize);
 
-        result=new FBOTexture(fboWidth, fboHeight);
+        result=new FBOTexture(fboSize, fboSize);
 
-        hblur = new FBOTexture(fboWidth, fboHeight);
-        vblur = new FBOTexture(fboWidth, fboHeight);
+        hblur = new FBOTexture(fboSize, fboSize);
+        vblur = new FBOTexture(fboSize, fboSize);
 
-        additiveBlend=new FBOTexture(512, 512);
+        additiveBlend=new FBOTexture(fboSize/2, fboSize/2);
 
-        hardBlocksBuffer = new FBOTexture(256, 256);
-        linearShadowsBuffer = new FBOTexture(512, 512);
+        hardBlocksBuffer = new FBOTexture(fboSize/2, fboSize/2);
+        linearShadowsBuffer = new FBOTexture(fboSize/2, fboSize/2);
 
-        angledShadowBuffer = new FBOTexture(512, 1);
-        fovBuffer = new FBOTexture(512, 512);
-        lamp= new FBOTexture(512, 512);
+        angledShadowBuffer = new FBOTexture(fboSize/2, 1);
+        fovBuffer = new FBOTexture(fboSize/2, fboSize/2);
+        lamp= new FBOTexture(fboSize/2, fboSize/2);
 
         screen = new FBORenderer();
 
         fontRenderer=new FontRenderer(0.6f, 0.6f);
+
+        mapRenderer=new MapRenderer(world);
 
         checkForGLError();
     }
@@ -97,21 +100,6 @@ public class WorldRender {
     private BlockRenderer[][] blocks = new BlockRenderer[StrangeWorld.SIZE][StrangeWorld.SIZE];
     private HumanRenderer player = new HumanRenderer();
     private BulletRenderer bulletRenderer = new BulletRenderer();
-
-
-    private void drawBlockLighted(int x, int y) {
-            if (world.isVisible(x, y) != 0 && world.getBlock(x, y).getIsHard()) {
-                blocks[y][x].render();
-            }
-    }
-
-    private void drawBlock(int x, int y) {
-        if (world.isVisible(x, y) != 0) {
-            blocks[y][x].render();
-        }
-    }
-
-
 
     private String floatToString(float f) {
         String h= String.valueOf(f*100);
@@ -138,32 +126,6 @@ public class WorldRender {
 
             fontRenderer.render(getUnitState(u), u.getX(), u.getY());
         }
-
-
-
-		/*int diameter = (int) (blockSize * u.getRadius() * 2);
-        g2.drawImage(
-				textureLoader.getUnitTexture(u.getType())[((int) (u.getViewAngle() * 360 / 2 / Math.PI))],
-				(int) ((u.getX() - u.getRadius()) * blockSize + dx),
-				(int) ((u.getY() - u.getRadius()) * blockSize + dy),
-				diameter, diameter, null);
-
-
-		if (u.getHealth() > 0) {
-			g2.setStroke(new BasicStroke(1));
-			g2.setColor(new Color(1 - u.getHealth(), u.getHealth(), 0, 0.5f));
-			g2.fillRect((int) ((u.getX() - u.getRadius()) * blockSize + dx),
-					(int) ((u.getY() - u.getRadius()) * blockSize + dy - 15),
-					(int) (diameter * u.getHealth()), 10);
-
-			g2.setColor(new Color(1 - u.getHealth(), u.getHealth(), 0));
-			g2.drawRect((int) ((u.getX() - u.getRadius()) * blockSize + dx),
-					(int) ((u.getY() - u.getRadius()) * blockSize + dy - 15),
-					(int) (diameter * u.getHealth()), 10);
-			g2.drawRect((int) ((u.getX() - u.getRadius()) * blockSize + dx),
-					(int) ((u.getY() - u.getRadius()) * blockSize + dy - 15),
-					(int) (diameter), 10);
-		}*/
     }
 
     private void drawBullet(Bullet b) {
@@ -180,16 +142,10 @@ public class WorldRender {
         glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-            int blockX = (int) world.getMe().getX();
-            int blockY = (int) world.getMe().getY();
-
             Shader.defaultShader.enable();
             camera.lookAtPlayer();
-            for (int x = blockX - Camera.intSize*2; x <= blockX + Camera.intSize*2; x++) {
-                for (int y = blockY - Camera.intSize*2; y <= blockY + Camera.intSize*2; y++) {
-                    drawBlock(x, y);
-                }
-            }
+
+            mapRenderer.render(0, 0);
 
             world.getUnits()
                     .stream()
@@ -210,23 +166,20 @@ public class WorldRender {
         glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-        int dx = (int) ddx;
-        int dy = (int) ddy;
-
         Shader.defaultShader.enable();
 
         camera.lookAt(ddx, ddy);
 
-        for (int x = -Camera.intSize*3/2; x <= Camera.intSize*3/2; x++) {
-            for (int y = -Camera.intSize; y <= Camera.intSize; y++) {
-                drawBlockLighted(x + dx, y + dy);
-            }
-        }
+        mapRenderer.renderHard(0, 0);
 
         Shader.defaultShader.disable();
         hardBlocksBuffer.unbindForWriting();
         return hardBlocksBuffer;
     }
+
+    private int unrollShaderColorR=Shader.unrollShadows.getUniform("color_r");
+    private int unrollShaderColorG=Shader.unrollShadows.getUniform("color_g");
+    private int unrollShaderColorB=Shader.unrollShadows.getUniform("color_b");
 
     private void renderLightMap(FBOTexture result, float x, float y, float r, float g, float b) {
 
@@ -267,9 +220,9 @@ public class WorldRender {
 
         angledShadowBuffer.bind();
         Shader.unrollShadows.enable();
-        Shader.unrollShadows.setUniform1f("color_r", r);
-        Shader.unrollShadows.setUniform1f("color_g", g);
-        Shader.unrollShadows.setUniform1f("color_b", b);
+        Shader.unrollShadows.setUniform1f(unrollShaderColorR, r);
+        Shader.unrollShadows.setUniform1f(unrollShaderColorG, g);
+        Shader.unrollShadows.setUniform1f(unrollShaderColorB, b);
         camera.lookAtFBOCenter();
         screen.render(-(world.getMe().getX()-x)*9/16, world.getMe().getY()-y,
                 Shader.unrollShadows);
@@ -399,10 +352,22 @@ public class WorldRender {
         renderLightSource(45, 45, 0f, 1f, 1f); lightSources[0]++;
 
         float time=(System.currentTimeMillis()%1000)/1000f;
+
         renderLightSource(
                 (float)(27+4*Math.cos(time*2*Math.PI)),
                 (float)(27+4*Math.sin(time*2*Math.PI)),
                 1f, 0f, 0f);
+
+        renderLightSource(
+                (float)(27-4*Math.cos(time*2*Math.PI)),
+                (float)(27-4*Math.sin(time*2*Math.PI)),
+                1f, 1f, 0f);
+
+
+        renderLightSource(
+                27,
+                27,
+                0f, 0f, (float) ((1+Math.sin(time*2*Math.PI))/2));
 
         world.getBullets()
                 .stream()
@@ -453,6 +418,9 @@ public class WorldRender {
         applyLightning();
         applyFov();
         drawHUD();
+
+
+
 
         render.tack();
 

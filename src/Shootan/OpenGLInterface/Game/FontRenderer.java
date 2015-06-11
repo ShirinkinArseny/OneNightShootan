@@ -23,7 +23,7 @@ public class FontRenderer {
 			"-_=+[]{};:'\"\\|,<",
 			".>/?`~"};
 
-	private static byte[] indices = new byte[]{
+	private static int[] indices = new int[]{
 			0,1,2,
 			2,3,0
 	};
@@ -67,19 +67,11 @@ public class FontRenderer {
 		}
 	}
 
-	public void bind() {
-		texture.bind();
-	}
-
-	public void unbind() {
-		texture.unbind();
-	}
-
 	public void render(float x, float y, char c) {
 
 		if (VAO[c]!=null) {
 
-			Shader.getCurrentShader().setUniformMat4f("ml_matrix",
+			Shader.getCurrentShader().setUniformMat4f(Shader.getCurrentShader().modelMatrixUniformId,
 					Matrix4f.translate(x, y, 0));
 
 			VAO[c].render();

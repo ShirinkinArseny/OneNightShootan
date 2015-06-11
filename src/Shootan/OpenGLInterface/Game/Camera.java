@@ -53,8 +53,8 @@ public class Camera {
         Shader s = Shader.getCurrentShader();
 
         if (s != null) {
-            s.setUniformMat4f("vw_matrix", playerCameraMatrix);
-            s.setUniformMat4f("pr_matrix", pr_matrix);
+            s.setUniformMat4f(s.viewMatrixUniformId, playerCameraMatrix);
+            s.setUniformMat4f(s.projectionMatrixUniformId, pr_matrix);
         } else {
             new Exception("Current shader is not selected").printStackTrace();
         }
@@ -66,8 +66,8 @@ public class Camera {
         Shader s = Shader.getCurrentShader();
 
         if (s != null) {
-            s.setUniformMat4f("vw_matrix", playerPositionClone);
-            s.setUniformMat4f("pr_matrix", pr_matrix);
+            s.setUniformMat4f(s.viewMatrixUniformId, playerPositionClone);
+            s.setUniformMat4f(s.projectionMatrixUniformId, pr_matrix);
         } else {
             new Exception("Current shader is not selected").printStackTrace();
         }
@@ -81,8 +81,8 @@ public class Camera {
 
             Matrix4f translationMatrix = Matrix4f.translate(dx, dy, 0);
 
-            s.setUniformMat4f("vw_matrix", translationMatrix);
-            s.setUniformMat4f("pr_matrix", pr_matrix_1024);
+            s.setUniformMat4f(s.viewMatrixUniformId, translationMatrix);
+            s.setUniformMat4f(s.projectionMatrixUniformId, pr_matrix_1024);
         } else {
             new Exception("Current shader is not selected").printStackTrace();
         }
@@ -92,8 +92,8 @@ public class Camera {
 
         Shader s = Shader.getCurrentShader();
         if (s != null) {
-            s.setUniformMat4f("vw_matrix", Matrix4f.IDENTITY);
-            s.setUniformMat4f("pr_matrix", pr_matrix);
+            s.setUniformMat4f(s.viewMatrixUniformId, Matrix4f.IDENTITY);
+            s.setUniformMat4f(s.projectionMatrixUniformId, pr_matrix);
         } else {
             new Exception("Current shader is not selected").printStackTrace();
         }
@@ -104,8 +104,8 @@ public class Camera {
 
         Shader s = Shader.getCurrentShader();
         if (s != null) {
-            s.setUniformMat4f("vw_matrix", Matrix4f.IDENTITY);
-            s.setUniformMat4f("pr_matrix", pr_matrix_1024);
+            s.setUniformMat4f(s.viewMatrixUniformId, Matrix4f.IDENTITY);
+            s.setUniformMat4f(s.projectionMatrixUniformId, pr_matrix_1024);
         } else {
             new Exception("Current shader is not selected").printStackTrace();
         }

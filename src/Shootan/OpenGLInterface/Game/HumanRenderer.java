@@ -26,7 +26,7 @@ public class HumanRenderer {
 			1, 1
 	};
 	
-	private static byte[] indices = new byte[]{
+	private static int[] indices = new int[]{
 			0,1,2,
 			2,3,0
 	};
@@ -54,7 +54,7 @@ public class HumanRenderer {
 
 	public void render(float x, float y, float angle) {
 
-		Shader.getCurrentShader().setUniformMat4f("ml_matrix",
+		Shader.getCurrentShader().setUniformMat4f(Shader.getCurrentShader().modelMatrixUniformId,
 				Matrix4f.translate(x, y, 0).multiply(Matrix4f.getRotated(angle)));
 
 		VAO.render();

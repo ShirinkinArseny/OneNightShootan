@@ -31,8 +31,6 @@ public class FBOTexture extends AbstractTexture {
                 0, GL_RGBA, width, height,
                 0, GL_RGBA, GL_UNSIGNED_BYTE, (ByteBuffer)null);
 
-        System.out.println("Creating FBO texture "+width+"x"+height);
-
         glBindTexture(GL_TEXTURE_2D, 0);
 
         checkForGLError();
@@ -56,17 +54,29 @@ public class FBOTexture extends AbstractTexture {
 
         glBindFramebuffer(GL_FRAMEBUFFER, 0);
 
+        System.out.println("Created FBO texture "+width+"x"+height+", id: "+fboId);
     }
 
+    private static int bindedFBO=0;
 
     public void bindForWriting(){
-        glBindFramebuffer(GL_FRAMEBUFFER, fboId);
-        glViewport(0,0,width,height);
+        if (bindedFBO!=0) {
+            new Exception("FBO already binded!").printStackTrace();
+        } else {
+            glBindFramebuffer(GL_FRAMEBUFFER, fboId);
+            glViewport(0, 0, width, height);
+            bindedFBO = fboId;
+        }
     }
 
     public void unbindForWriting(){
-        glBindFramebuffer(GL_FRAMEBUFFER, 0);
-        glViewport(0,0, Main.width, Main.height);
+        if (bindedFBO==0) {
+            new Exception("FBO already unbinded!").printStackTrace();
+        } else {
+            glBindFramebuffer(GL_FRAMEBUFFER, 0);
+            glViewport(0, 0, Main.width, Main.height);
+            bindedFBO=0;
+        }
     }
 
     public void dispose() {

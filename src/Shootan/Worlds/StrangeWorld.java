@@ -271,6 +271,17 @@ public abstract class StrangeWorld extends World {
             blocks[i+1][i-1] = new Floor();
             blocks[i+1][i] = new Floor();
             blocks[i+1][i+1] = new Floor();
+
+
+            blocks[i-1][53-i+1] = new Floor();
+            blocks[i-1][53-i] = new Floor();
+            blocks[i-1][53-i-1] = new Floor();
+
+            blocks[i][53-i] = new Floor();
+
+            blocks[i+1][53-i+1] = new Floor();
+            blocks[i+1][53-i] = new Floor();
+            blocks[i+1][53-i-1] = new Floor();
         }
 
         for (int i=22; i<32; i++) {
