@@ -339,11 +339,6 @@ public class WorldRender {
                 message
                 , -10, -9);
 
-
-        camera.lookAtFBOCenter();
-        fontRenderer.render("+"
-                , cursorX*Camera.size*9/16, cursorY*Camera.size);
-
         Shader.defaultShader.disable();
     }
 
@@ -434,10 +429,4 @@ public class WorldRender {
         this.message = message;
     }
 
-    private float cursorX=0;
-    private float cursorY=0;
-    public void setCursor(float x, float y) {
-        cursorX=(x-0.5f)*2;
-        cursorY=(y-0.5f)*2;
-    }
 }

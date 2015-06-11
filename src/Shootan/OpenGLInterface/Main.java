@@ -64,7 +64,7 @@ public class Main implements Runnable{
 			System.err.println("Could not createShader our Window!");
 		}
 
-		glfwSetInputMode(window, GLFW.GLFW_CURSOR, GLFW.GLFW_CURSOR_DISABLED);
+		//glfwSetInputMode(window, GLFW.GLFW_CURSOR, GLFW.GLFW_CURSOR_DISABLED);
 
 
 		ByteBuffer vidmode = glfwGetVideoMode(glfwGetPrimaryMonitor());
@@ -131,8 +131,8 @@ public class Main implements Runnable{
 
 		if (x-this.x!=0 || y-this.y!=0) {
 			game.mouseMoved(
-					(float)(x)/width,
-					(float)(y)/height
+					(float)x/width,
+					(float)y/height
 			);
 		}
 		this.x=x;

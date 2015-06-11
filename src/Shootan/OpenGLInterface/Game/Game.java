@@ -35,15 +35,13 @@ public class Game {
 	public void mouseMoved(float x, float y) {
 
 
-		float dx=x-0.5f;
+		float dx=(x-0.5f)*16/9;
 		float dy=y-0.5f;
 		float angle=0;
 		if (dx!=0 || dy!=0) {
 			angle= -(float) Math.atan2(dy, dx);
 		}
 		world.getMe().setViewAngle(angle);
-
-		worldRender.setCursor(x, y);
 	}
 
 	public void init() {
