@@ -5,11 +5,9 @@ import Shootan.Bullets.Bullet;
 import Shootan.OpenGLInterface.Graphics.AbstractTexture;
 import Shootan.OpenGLInterface.Graphics.FBOTexture;
 import Shootan.OpenGLInterface.Graphics.Shader;
-import Shootan.OpenGLInterface.Graphics.Texture;
 import Shootan.OpenGLInterface.Math.Matrix4f;
 import Shootan.Units.Unit;
 import Shootan.Worlds.ClientWorld;
-import Shootan.Worlds.StrangeWorld;
 import org.lwjgl.opengl.GL14;
 
 
@@ -21,9 +19,6 @@ public class WorldRender {
 
     private ClientWorld world;
     private Camera camera;
-
-    private Texture brickTexture;
-    private Texture floorTexture;
 
     private FBOTexture hardBlocksBuffer;
     private FBOTexture linearShadowsBuffer;
@@ -54,15 +49,6 @@ public class WorldRender {
         this.world = world;
         this.camera = camera;
 
-        brickTexture = new Texture("content/brick.png");
-        floorTexture = new Texture("content/floor.png");
-
-        for (int i = 0; i < StrangeWorld.SIZE; i++) {
-            for (int j = 0; j < StrangeWorld.SIZE; j++) {
-                blocks[i][j] = new BlockRenderer(world.getBlock(j, i).getType() == 0 ? brickTexture : floorTexture, j, i);
-            }
-        }
-
         scene=new FBOTexture(fboSize, fboSize);
 
         result=new FBOTexture(fboSize, fboSize);
@@ -89,15 +75,12 @@ public class WorldRender {
     }
 
     public void dispose() {
-        brickTexture.dispose();
-        floorTexture.dispose();
         hardBlocksBuffer.dispose();
         linearShadowsBuffer.dispose();
         angledShadowBuffer.dispose();
         fovBuffer.dispose();
     }
 
-    private BlockRenderer[][] blocks = new BlockRenderer[StrangeWorld.SIZE][StrangeWorld.SIZE];
     private HumanRenderer player = new HumanRenderer();
     private BulletRenderer bulletRenderer = new BulletRenderer();
 
