@@ -1,19 +1,19 @@
 package Shootan.Worlds;
 
-import Shootan.Bullets.Bullet;
-import Shootan.Units.Human;
-import Shootan.Units.Unit;
+import Shootan.GameEssences.Bullets.Bullet;
+import Shootan.GameEssences.Units.Unit;
+import Shootan.ServerConfigs;
 import Shootan.Utils.IndexWrapper;
 
 import java.util.*;
 import java.util.concurrent.CopyOnWriteArrayList;
-import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 
-import static Shootan.Utils.ByteUtils.booleanToByte;
-import static Shootan.Utils.ByteUtils.twoBytesToUInt;
+import static Shootan.Utils.ByteUtils.*;
 
 public class ClientWorld extends StrangeWorld {
+
+    private boolean acceptedDump=false;
 
     public ArrayList<Byte> createUnitChangedState() {
         return getMe().serializeState();
@@ -23,7 +23,7 @@ public class ClientWorld extends StrangeWorld {
 
     private Consumer<String> onInputMessage;
 
-    private void applyLastDump() {
+    public void applyLastDump() {
 
         try {
 
@@ -32,14 +32,17 @@ public class ClientWorld extends StrangeWorld {
                 dumps.clear();
 
                 IndexWrapper index = new IndexWrapper();
-                int usersNumber = twoBytesToUInt(data.get(index.value++), data.get(index.value++));
+                int usersNumber = twoBytesToUInt(data, index);
                 for (int i = 0; i < usersNumber; i++) {
 
+
                     boolean found = false;
-                    int id = twoBytesToUInt(data.get(index.value), data.get(index.value + 1));
+                    int id = twoBytesToUInt(data, index);
                     for (Unit u : units) {
                         if (u.getId() == id) {
                             found = true;
+
+                            int type = twoBytesToUInt(data, index);//ignored
                             if (id == this.myId) {
                                 u.fullDeserialiseIgnoringOpinion(data, index);
                                 me = u;
@@ -51,17 +54,21 @@ public class ClientWorld extends StrangeWorld {
                     }
 
                     if (!found) {
-                        units.add(Unit.createDeserialized(data, index));
+                        Unit newUnit=Unit.createDeserialized(id, data, index);
+                        units.add(newUnit);
+                        if (id == this.myId) {
+                            me = newUnit;
+                        }
                     }
 
                 }
-                int bulletsNumber = twoBytesToUInt(data.get(index.value++), data.get(index.value++));
+                int bulletsNumber = twoBytesToUInt(data, index);
 
                 ArrayList<Bullet> alifeBullets = new ArrayList<>(bullets.size());
 
                 for (int i = 0; i < bulletsNumber; i++) {
-                    int id = twoBytesToUInt(data.get(index.value++), data.get(index.value++));
-                    int type = twoBytesToUInt(data.get(index.value++), data.get(index.value++));
+                    int id = twoBytesToUInt(data, index);
+                    int type = twoBytesToUInt(data, index);
                     boolean found = false;
                     for (Bullet b : bullets) {
                         if (b.getID() == id) {
@@ -84,7 +91,7 @@ public class ClientWorld extends StrangeWorld {
                 bullets.addAll(alifeBullets);
                 alifeBullets.clear();
 
-                int messageBytesNumber = twoBytesToUInt(data.get(index.value++), data.get(index.value++));
+                int messageBytesNumber = twoBytesToUInt(data, index);
                 if (messageBytesNumber != 0) {
                     byte[] messageBytes = new byte[messageBytesNumber];
                     for (int i = 0; i < messageBytesNumber; i++) {
@@ -95,13 +102,22 @@ public class ClientWorld extends StrangeWorld {
                     onInputMessage.accept(message);
                 }
 
+                if (!acceptedDump) {
+                    acceptedDump = true;
+                }
+
+                if (me==null) {
+                    new Exception("ME is still null").printStackTrace();
+                }
             }
+
+
         } catch (IndexOutOfBoundsException e) {
             e.printStackTrace();
         }
     }
 
-    public void acceptWorldDump(ArrayList<Byte> data) {
+    public void acceptWorldDump(Long connectionId, ArrayList<Byte> data) {
         if (dumps.size()>0) {
             dumps.clear();
         }
@@ -109,101 +125,8 @@ public class ClientWorld extends StrangeWorld {
     }
 
 
-    public int isVisible(int x, int y) {
-        if (!(x >= 0 && x < SIZE && y >= 0 && y < SIZE)) return 0;
-        return visibility[y][x].get();
-    }
 
-    private boolean getHasHardBlocksIgnoringStart(float fromX, float fromY, float toX, float toY) {
-        float idx=toX-fromX;
-        float idy=toY-fromY;
-
-        float length= (float) Math.sqrt(idx*idx+idy*idy);
-
-        float dx=idx/length;
-        float dy=idy/length;
-
-        float x=fromX;
-        float y=fromY;
-
-        for (int i=0; i<length; i++) {
-
-            if (!((int)y==(int)fromY && (int)x==(int)fromX)) {
-                if (blocks[(int)y][(int)x].getIsHard())
-                    return true;
-            }
-
-            x+=dx;
-            y+=dy;
-        }
-        return false;
-    }
-
-    private int updateBlockVisibility(float cameraBlockX, float cameraBlockY, int blockX, int blockY) {
-
-
-        boolean isVisible1=!getHasHardBlocksIgnoringStart(blockX, blockY, cameraBlockX, cameraBlockY);
-
-        boolean isVisible2=!getHasHardBlocksIgnoringStart(blockX+1, blockY, cameraBlockX, cameraBlockY);
-
-        boolean isVisible3=!getHasHardBlocksIgnoringStart(blockX, blockY+1, cameraBlockX, cameraBlockY);
-
-        boolean isVisible4=!getHasHardBlocksIgnoringStart(blockX+1, blockY+1, cameraBlockX, cameraBlockY);
-
-
-        int res=
-                (isVisible1?1:0)+
-                (isVisible2?1:0)+
-                (isVisible3?1:0)+
-                (isVisible4?1:0);
-
-
-        /*if (res!=0) {
-
-            float myAngle = getMe().getViewAngle();
-            if (myAngle < 0) myAngle += 2 * Math.PI;
-
-            float blockAngle = (float) Math.atan2(blockY - cameraBlockY, blockX - cameraBlockX);
-            if (blockAngle < 0) blockAngle += 2 * Math.PI;
-
-            float angle = Math.abs(myAngle - blockAngle);
-            angle = (float) Math.min(angle, 2 * Math.PI - angle);
-
-            int res2;
-            if (angle < Math.PI / 3) res2 = 4;
-            else if (angle < Math.PI * 2 / 5) res2 = 3;
-            else if (angle < Math.PI * 3 / 7) res2 = 2;
-            else if (angle < Math.PI * 1 / 2) res2 = 1;
-            else
-                res2 = 0;
-
-            if (res2 == 0) {
-                res = 0;
-            } else {
-                res=res2*res/4;
-            }
-        }*/
-
-        return res;
-    }
-
-    private void updateVisibilityMap(float cameraX, float cameraY) {
-
-        int cameraXI= (int) cameraX;
-        int cameraYI= (int) cameraY;
-
-        new Thread(() -> {
-            for (int i=Math.max(0, cameraXI-getPotentialViewDistance); i<Math.min(SIZE, cameraXI + getPotentialViewDistance); i++) {
-                for (int j=Math.max(0, cameraYI-getPotentialViewDistance); j < Math.min(SIZE, cameraYI + getPotentialViewDistance); j++) {
-                    visibility[j][i].set(updateBlockVisibility(cameraX, cameraY, i, j));
-                }
-            }
-        }).start();
-
-
-    }
-
-    private int myId =new Random().nextInt(10);
+    private int myId=-1;
     private Unit me=null;
     public Unit getMe() {
         return me;
@@ -233,6 +156,16 @@ public class ClientWorld extends StrangeWorld {
         }
     }
 
+    private long lastUpdation=0;
+
+    @Override
+    public void additionalUpdate(float deltaTime) {
+        if (System.nanoTime()-lastUpdation>100000000) {
+            updateVisibilityMap(getMe().getX(), getMe().getY());
+            lastUpdation=System.nanoTime();
+        }
+    }
+
     public void update(float dt) {
         applyLastDump();
         super.update(dt);
@@ -251,19 +184,46 @@ public class ClientWorld extends StrangeWorld {
                 break;
             }
         }
-
-        for (int i=0; i<SIZE; i++) {
-            for (int j=0; j <SIZE; j++) {
-                visibility[j][i].set(4);
-            }
-        }
-
-        new Timer().schedule(new TimerTask() {
-            @Override
-            public void run() {
-                updateVisibilityMap(getMe().getX(), getMe().getY());
-            }
-        }, 20, 20);
     }
 
+    public ArrayList<Byte> generateHandShake() {
+        ArrayList<Byte> res=new ArrayList<>();
+        res.addAll(uIntToBytes(ServerConfigs.gameVersion));
+        res.addAll(stringToBytes(securityHash(ServerConfigs.serverPassword+ServerConfigs.playerName)));
+        res.addAll(stringToBytes(ServerConfigs.playerName));
+        return res;
+    }
+
+    private int[] frags;
+    private int[] deaths;
+    private HashMap<Integer, String> unitNameMap=new HashMap<>(); //Contains connection between player id (network connection id) and [unit id, player name]
+
+    public boolean acceptHandShake(Long id, ArrayList<Byte> bytes) {
+        IndexWrapper index=new IndexWrapper();
+        boolean success=byteToBoolean(bytes, index);
+        if (success) {
+            myId=twoBytesToUInt(bytes, index);
+
+            int playersNumber=twoBytesToUInt(bytes, index);
+            frags=new int[playersNumber];
+            deaths=new int[playersNumber];
+            for (int i=0; i<playersNumber; i++) {
+                int unitId=twoBytesToUInt(bytes, index);
+                String name=bytesToString(bytes, index);
+                unitNameMap.put(unitId, name);
+                frags[unitId]=twoBytesToUInt(bytes, index);
+                deaths[unitId]=twoBytesToUInt(bytes, index);
+            }
+            return true;
+
+        } else {
+            String errorMessage=bytesToString(bytes, index);
+            new Exception("CANNOT PLAY WITH THIS SERVER CUZ: "+errorMessage).printStackTrace();
+            return false;
+        }
+    }
+
+    public boolean getAcceptedDump() {
+        return acceptedDump;
+    }
 }

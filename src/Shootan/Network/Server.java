@@ -4,14 +4,17 @@ import java.io.IOException;
 import java.net.*;
 
 import java.util.ArrayList;
+import java.util.function.BiConsumer;
+import java.util.function.BiFunction;
 import java.util.function.Consumer;
 
 
 public class Server {
 
     private ArrayList<ServerConnection> clients;
-    private Consumer<ArrayList<Byte>> event;
-    private Consumer<String> onConnected;
+    private BiConsumer<Long, ArrayList<Byte>> onInput;
+    private BiFunction<Long, ArrayList<Byte>,  ArrayList<Byte>> onHandShake;
+    private Consumer<Long> onDisconnected;
     private int port;
 
     public void sendMessage(ArrayList<Byte> s) {
@@ -19,12 +22,16 @@ public class Server {
             c.sendMessage(s);
     }
 
-    public void setOnConnectedEvent(Consumer<String> onConnected) {
-        this.onConnected=onConnected;
+    public void setOnDisconnectedEvent(Consumer<Long> onDisconnected) {
+        this.onDisconnected=onDisconnected;
     }
 
-    public void setOnInputEvent(Consumer<ArrayList<Byte>> r) {
-        event=r;
+    public void setOnHandShakeEvent(BiFunction<Long, ArrayList<Byte>,  ArrayList<Byte>> r) {
+        onHandShake =r;
+    }
+
+    public void setOnInputEvent(BiConsumer<Long, ArrayList<Byte>> r) {
+        onInput =r;
     }
 
     public Server(int port){
@@ -43,22 +50,37 @@ public class Server {
                     new Thread(() -> {
                         ServerConnection cl = new ServerConnection();
 
-                        cl.setOnInputEvent(event::accept);
+                        final boolean[] isFirstUsage = {true};
+                        cl.setOnInputEvent((id, bytes) -> {
+                            if (isFirstUsage[0]) {
+                                ArrayList<Byte> response=onHandShake.apply(id, bytes);
+                                cl.sendMessage(response);
+                                isFirstUsage[0] =false;
+
+                                byte[] sBytes=new byte[response.size()];
+                                for (int i=0; i<response.size(); i++) {
+                                    sBytes[i]=response.get(i);
+                                }
+
+                                System.out.println("Send response: "+new String(sBytes));
+                                clients.add(cl);
+                            } else {
+                                onInput.accept(id, bytes);
+                            }
+                        });
 
                         cl.setOnCloseEvent(() -> {
                             System.out.println("[Server] Disconnected client: " + client.getInetAddress().toString());
-                            onConnected.accept(client.getInetAddress()+" disconnected");
+                            onDisconnected.accept(cl.getConnectionID());
                             clients.remove(cl);
                         });
 
-                        clients.add(cl);
                         try {
                             cl.startWorking(client);
                         } catch (IOException e) {
                             e.printStackTrace();
                         }
                         System.out.println("[Server] Got client: " + client.getInetAddress());
-                        onConnected.accept(client.getInetAddress()+" connected");
                     }).start();
 
 

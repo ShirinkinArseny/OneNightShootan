@@ -1,30 +1,125 @@
 package Shootan.Worlds;
 
-import Shootan.Blocks.Block;
-import Shootan.Blocks.Brick;
-import Shootan.Blocks.Floor;
-import Shootan.Bullets.Bullet;
-import Shootan.Units.Human;
-import Shootan.Units.Unit;
+import Shootan.GameEssences.Blocks.Block;
+import Shootan.GameEssences.Blocks.Brick;
+import Shootan.GameEssences.Blocks.Floor;
+import Shootan.GameEssences.Bullets.Bullet;
+import Shootan.GameEssences.Units.Human;
+import Shootan.GameEssences.Units.Unit;
+import Shootan.GameEssences.Units.VisibleUnit;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;
-import java.util.concurrent.atomic.AtomicInteger;
 
 import static Shootan.Utils.GeometryUtils.getQuadDistFromPointToLine;
 import static Shootan.Utils.GeometryUtils.getQuadIntersectsCircle;
 
-public abstract class StrangeWorld extends World {
+public abstract class StrangeWorld extends World implements VisibleWorld{
 
     public static final int SIZE = 100;
 
-    protected CopyOnWriteArrayList<Unit> units = new CopyOnWriteArrayList<>();
+    protected final ArrayList<Unit> units = new ArrayList<>();
     protected Block[][] blocks = new Block[SIZE][SIZE];
-    protected AtomicInteger[][] visibility = new AtomicInteger[SIZE][SIZE];
-    protected CopyOnWriteArrayList<Bullet> bullets = new CopyOnWriteArrayList<>();
+    protected boolean[][] visibility = new boolean[SIZE][SIZE];
+    protected final ArrayList<Bullet> bullets = new ArrayList<>();
 
     public void onKilled(Unit killedUnit, Bullet killer) {}
+
+
+    public Block getVisibleBlock(int x, int y) {
+        if (!isVisible(x, y)) return null;
+        return blocks[y][x];
+    }
+
+    public boolean isVisible(int x, int y) {
+        return x >= 0 && x < SIZE && y >= 0 && y < SIZE && visibility[y][x];
+    }
+
+    private boolean getHasHardBlocksIgnoringStart(float fromX, float fromY, float toX, float toY) {
+        float idx=toX-fromX;
+        float idy=toY-fromY;
+
+        float length= (float) Math.sqrt(idx*idx+idy*idy);
+
+        float dx=idx/length;
+        float dy=idy/length;
+
+        float x=fromX;
+        float y=fromY;
+
+        for (int i=0; i<length; i++) {
+
+            if (!((int)y==(int)fromY && (int)x==(int)fromX)) {
+                if (blocks[(int)y][(int)x].getIsHard())
+                    return true;
+            }
+
+            x+=dx;
+            y+=dy;
+        }
+        return false;
+    }
+
+    private boolean updateBlockVisibility(float cameraBlockX, float cameraBlockY, int blockX, int blockY) {
+
+
+        boolean isVisible1=!getHasHardBlocksIgnoringStart(blockX, blockY, cameraBlockX, cameraBlockY);
+        if (isVisible1) return true;
+        boolean isVisible2=!getHasHardBlocksIgnoringStart(blockX+1, blockY, cameraBlockX, cameraBlockY);
+        if (isVisible2) return true;
+        boolean isVisible3=!getHasHardBlocksIgnoringStart(blockX, blockY+1, cameraBlockX, cameraBlockY);
+        if (isVisible3) return true;
+        boolean isVisible4=!getHasHardBlocksIgnoringStart(blockX+1, blockY+1, cameraBlockX, cameraBlockY);
+        return isVisible4;
+
+        /*if (res!=0) {
+
+            float myAngle = getMe().getViewAngle();
+            if (myAngle < 0) myAngle += 2 * Math.PI;
+
+            float blockAngle = (float) Math.atan2(blockY - cameraBlockY, blockX - cameraBlockX);
+            if (blockAngle < 0) blockAngle += 2 * Math.PI;
+
+            float angle = Math.abs(myAngle - blockAngle);
+            angle = (float) Math.min(angle, 2 * Math.PI - angle);
+
+            int res2;
+            if (angle < Math.PI / 3) res2 = 4;
+            else if (angle < Math.PI * 2 / 5) res2 = 3;
+            else if (angle < Math.PI * 3 / 7) res2 = 2;
+            else if (angle < Math.PI * 1 / 2) res2 = 1;
+            else
+                res2 = 0;
+
+            if (res2 == 0) {
+                res = 0;
+            } else {
+                res=res2*res/4;
+            }
+        }*/
+    }
+
+    public void updateVisibilityMap(float cameraX, float cameraY) {
+
+        for (int i=0; i<SIZE; i++) {
+            for (int j = 0; j < SIZE; j++) {
+                visibility[i][j] = false;
+            }
+        }
+
+        int cameraXI= (int) cameraX;
+        int cameraYI= (int) cameraY;
+
+
+            for (int i=Math.max(0, cameraXI- potentialViewDistance); i<Math.min(SIZE, cameraXI + potentialViewDistance); i++) {
+                for (int j=Math.max(0, cameraYI- potentialViewDistance); j < Math.min(SIZE, cameraYI + potentialViewDistance); j++) {
+                    visibility[j][i]=(updateBlockVisibility(cameraX, cameraY, i, j));
+                }
+            }
+
+
+    }
 
     @Override
     public List<Bullet> getBullets() {
@@ -215,6 +310,8 @@ public abstract class StrangeWorld extends World {
             }
     }
 
+    public abstract void additionalUpdate(float deltaTime);
+
     @Override
     public void update(float deltaTime) {
         moveUnits(deltaTime);
@@ -222,16 +319,15 @@ public abstract class StrangeWorld extends World {
         updateBulletsCollisions(deltaTime);
         moveBullets(deltaTime);
         updateAlifeUnits();
+        additionalUpdate(deltaTime);
     }
 
     public StrangeWorld() {
-        for (int i=0; i<10; i++)
-            units.add(new Human(10, 10));
 
         for (int i = 0; i < SIZE; i++) {
             for (int j = 0; j < SIZE; j++) {
                 blocks[i][j] = new Brick();
-                visibility[i][j]=new AtomicInteger(4);
+                visibility[i][j]=false;
             }
         }
 

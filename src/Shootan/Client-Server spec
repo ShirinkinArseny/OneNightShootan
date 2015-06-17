@@ -1,8 +1,43 @@
+HandShake
+
+input
+    game version
+        2 bytes
+    (server password + username) hash sum
+        string
+    username
+        string
+
+output
+    is successfully connected
+        1 byte
+
+    if connected {
+        unit id
+            2 bytes
+        players list
+            players number
+                2 bytes
+            player stat
+                name
+                    string
+                frags
+                    2 bytes
+                deaths
+                    2 bytes
+    } else {
+        error message
+            string
+    }
+
+
+
+
 Default request-response scheme
 
+TODO: specify all deaths (make all clients know about them)
+
 input:
-    user id
-        2 bytes
     state
         selectedWeapon
             1 byte
@@ -71,11 +106,11 @@ output:
         ...
         user n
     message
-        count of bytes
-            2 bytes
-        bytes of message
+        string
 
-
+string encodes as
+    2 bytes - string length
+    n bytes - string's bytes
 
 
 

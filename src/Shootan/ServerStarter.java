@@ -12,33 +12,32 @@ public class ServerStarter {
 
 
 
+
         ServerWorld w=new ServerWorld();
 
-        Server server=new Server(ClientConfigs.serverPort);
+        Server server=new Server(ServerConfigs.serverPort);
+        server.setOnHandShakeEvent(w::acceptHandShake);
         server.setOnInputEvent(w::acceptUnitChangedState);
-        server.setOnConnectedEvent(w::addMessage);
+        server.setOnDisconnectedEvent(w::discardConnection);
         server.start();
-
-        new Thread(() -> {
-            while (true) {
-                server.sendMessage(w.createWorldDump());
-                try {
-                    Thread.sleep(20);
-                } catch (InterruptedException e) {
-                    e.printStackTrace();
-                }
-            }
-        }).start();
 
         new Thread(() -> {
 
             long lastTimeNanos=System.nanoTime();
 
             while (true) {
+                server.sendMessage(w.createWorldDump());
+
                 long currentTimeNanos = System.nanoTime();
                 float sec = (currentTimeNanos - lastTimeNanos) / 1000000000.0f;
                 lastTimeNanos = currentTimeNanos;
                 w.update(sec);
+                try {
+                    Thread.sleep(20);
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+
                 try {
                     Thread.sleep(20);
                 } catch (InterruptedException e) {

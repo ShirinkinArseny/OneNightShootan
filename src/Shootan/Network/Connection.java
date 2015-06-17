@@ -5,16 +5,26 @@ import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.concurrent.atomic.AtomicBoolean;
-import java.util.function.Consumer;
+import java.util.function.BiConsumer;
 
-import static Shootan.Utils.ByteUtils.bytesToString;
-import static Shootan.Utils.ByteUtils.stringToBytes;
+import static Shootan.Utils.ByteUtils.serializeBytes;
+import static Shootan.Utils.ByteUtils.deserializeBytes;
 
 public class Connection {
 
-    private Consumer<ArrayList<Byte>> event;
+    private BiConsumer<Long, ArrayList<Byte>> event;
     private Runnable close;
-    AtomicBoolean isWorking = new AtomicBoolean(true);
+    private static long connectorCounter=0;
+    private long connectionId;
+    private AtomicBoolean isWorking = new AtomicBoolean(true);
+
+    public Connection() {
+        connectionId=connectorCounter++;
+    }
+
+    public Long getConnectionID() {
+        return connectionId;
+    }
 
     public boolean getIsWorking() {
         return isWorking.get();
@@ -24,14 +34,14 @@ public class Connection {
         close = r;
     }
 
-    public void setOnInputEvent(Consumer<ArrayList<Byte>> r) {
+    public void setOnInputEvent(BiConsumer<Long, ArrayList<Byte>> r) {
         event = r;
     }
 
     public void sendMessage(ArrayList<Byte> s) {
             //System.out.println("[Connection] Sending message: " + s);
         if (out!=null)
-            out.println(bytesToString(s));
+            out.println(serializeBytes(s));
     }
 
     private PrintWriter out;
@@ -42,10 +52,9 @@ public class Connection {
         new Thread(() -> {
             try {
                 String input;
-                System.out.println("IN DA THREAD");
                 while ((input = in.readLine()) != null) {
                     //System.out.println("[Connection] Gotcha msg, working...");
-                    event.accept(stringToBytes(input));
+                    event.accept(connectionId, deserializeBytes(input));
                 }
             } catch (IOException e) {
                 e.printStackTrace();

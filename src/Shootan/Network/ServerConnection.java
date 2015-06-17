@@ -15,5 +15,4 @@ public class ServerConnection extends Connection {
 
     public ServerConnection()  {
     }
-
 }
