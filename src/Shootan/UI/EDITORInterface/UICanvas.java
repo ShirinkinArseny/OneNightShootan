@@ -8,11 +8,10 @@ import java.awt.event.*;
 import java.awt.image.BufferStrategy;
 
 public class UICanvas extends Canvas {
-    int sizex,sizey;
-    Button buttons[]=new Button[20];
-    Block blocks[]=new Block[1024];
-    TextField width,height;
-    int kOfButtons, kOfBlocks=0, sizeX=0, sizeY=0;
+    int sizeX=0, sizeY=0;
+    Activity chosen;
+    String typeOfBrush="Brick";
+
 
     public UICanvas() {
         super();
@@ -26,15 +25,8 @@ public class UICanvas extends Canvas {
             @Override
             public void keyPressed(KeyEvent e) {
                 char symb=e.getKeyChar();
-                if((symb>='0')&&(symb<='9'))
-                if((sizeY==0)||(sizeX==0)){
-                    if(width.chosen){
-                        width.value+=symb;
-                    }
-                    if(height.chosen){
-                        height.value+=symb;
-                    }
-                }
+                int code=e.getKeyCode();
+                chosen.keyPressed(symb,code);
             }
 
             @Override
@@ -46,17 +38,7 @@ public class UICanvas extends Canvas {
             @Override
             public void mouseDragged(MouseEvent e) {
                 int x=e.getX(), y=e.getY();
-                boolean cross=false;
-                for(int i=0;i<kOfBlocks;i++){
-                    if (!cross){
-                        cross=blocks[i].cross(x,y);
-                    }
-                }
-                if (!cross){
-                    kOfBlocks+=1;
-                    blocks[kOfBlocks-1]=new Block(x,y);
-                }
-
+                chosen.mouseDragged(x,y);
             }
 
             @Override
@@ -67,25 +49,7 @@ public class UICanvas extends Canvas {
         addMouseListener(new MouseListener() {
             @Override
             public void mouseClicked(MouseEvent e) {
-                int x=e.getX(), y=e.getY();
-                for(int i=0;i<kOfButtons;i++)
-                if(buttons[i].clicked(x,y)) {
-                    buttons[i].dosmth();
-                }
-                boolean cross=false;
-                for(int i=0;i<kOfBlocks;i++){
-                    if (!cross){
-                        cross=blocks[i].cross(x,y);
-                    }
-                }
-                if (!cross){
-                    kOfBlocks+=1;
-                    blocks[kOfBlocks-1]=new Block(x,y);
-                }
-                if((sizeX==0)||(sizeY==0)){
-                    width.chosen=width.clicked(x,y);
-                    height.chosen=height.clicked(x,y);
-                }
+                chosen.mouseClick(e.getX(),e.getY());
             }
 
             @Override
@@ -139,25 +103,41 @@ public class UICanvas extends Canvas {
         createBufferStrategy(3);
         bs = getBufferStrategy();
         g2 = (Graphics2D) bs.getDrawGraphics();
-        kOfButtons=2;
-        for(int i=0;i<kOfButtons;i++){
-            buttons[i]=new Button(20,80+i*20,100,20,i);
-        }
-        buttons[0].name="OK";
-        buttons[0].setAction(new Runnable() {
+        chosen=new Activity(1,2,0,0,getWidth(), getHeight(),false,g2);
+
+        chosen.buttons[0].name="OK";
+        chosen.buttons[0].setAction(new Runnable() {
             @Override
             public void run() {
-                sizeX=Integer.valueOf(width.value);
-                sizeY=Integer.valueOf(height.value);
+                try {
+                    sizeX=Integer.valueOf(chosen.text[0].value);
+                }catch (NumberFormatException e) {
+                    System.err.println("Неверный формат первой строки, мать ее три раза");
+                }
+                try {
+                    sizeY=Integer.valueOf(chosen.text[1].value);
+                }catch (NumberFormatException e) {
+                    System.err.println("Неверный формат второй строки, мать ее шесть раз");
+                }
+                if((sizeX!=0)&&(sizeY!=0)){
+                    chosen=new Activity(1,0,0,0,getWidth(), getHeight(), true, g2);
+                    chosen.buttons[0].setAction(new Runnable() {
+                        @Override
+                        public void run() {
+                            typeOfBrush="Brick";
+                        }
+                    });
+                }
             }
         });
 
-        width=new TextField(20,20);
-        height=new TextField(20,50);
-            new Timer(20, e -> {
-                update();
-                draw();
-            }).start();
+        chosen.text[0]=new TextField(20,20);
+        chosen.text[1]=new TextField(20,50);
+
+        new Timer(20, e -> {
+            update();
+            draw();
+        }).start();
     }
 
     private BufferStrategy bs;
@@ -187,19 +167,10 @@ public class UICanvas extends Canvas {
         YOUR FUKKEN RENDER
          */
         if((sizeX==0)||(sizeY==0)) {
-            width.draw(g2);
-            height.draw(g2);
-            buttons[0].draw(g2);
+            chosen.draw();
         }else {
+            chosen.draw();
 
-
-            for (int i = 0; i < kOfButtons; i++) {
-                buttons[i].draw(g2);
-            }
-
-            for (int i = 0; i < kOfBlocks; i++) {
-                blocks[i].draw(g2);
-            }
         }
 
         bs.show();
