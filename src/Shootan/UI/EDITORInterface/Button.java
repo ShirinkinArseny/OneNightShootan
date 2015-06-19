@@ -4,7 +4,7 @@ package Shootan.UI.EDITORInterface;
 import java.awt.*;
 
 public class Button {
-    int x,y,width,height,c1=10,c2=10,c3=10;
+    int x,y,width,height;
     Runnable action;
     String name;
 
@@ -17,10 +17,10 @@ public class Button {
     }
 
     protected void draw(Graphics2D g2){
-        g2.setColor(new Color(c1,c2,c3));
+        g2.setColor(new Color(255,255,255));
         g2.fillRect(x,y,width,height);
         g2.setColor(new Color(0,0,0));
-        g2.drawString(name,x+5,y+height/2);
+        g2.drawString(name,x+5,y+height/4*3);
     }
 
     protected boolean clicked(int x, int y) {

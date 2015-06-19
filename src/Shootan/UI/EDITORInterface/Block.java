@@ -27,7 +27,7 @@ public class Block {
     }
 
     protected boolean cross(int x, int y){
-        return ((x<=this.x+size)&&(x>=this.x-size)&&(y<=this.y+size)&&(y>=this.y-size));
+        return ((x<this.x+size)&&(x>this.x-size)&&(y<this.y+size)&&(y>this.y-size));
     }
 
 }
