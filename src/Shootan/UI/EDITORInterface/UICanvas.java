@@ -6,7 +6,7 @@ import java.awt.event.*;
 import java.awt.image.BufferStrategy;
 
 public class UICanvas extends Canvas {
-
+    Button testButton;
     public UICanvas() {
         super();
 
@@ -38,7 +38,9 @@ public class UICanvas extends Canvas {
         addMouseListener(new MouseListener() {
             @Override
             public void mouseClicked(MouseEvent e) {
-                
+                if(testButton.clicked(e.getX(),e.getY())){
+                    testButton.dosmth();
+                }
             }
 
             @Override
@@ -86,10 +88,23 @@ public class UICanvas extends Canvas {
         });
     }
 
+
+
     public void start() {
         createBufferStrategy(3);
         bs = getBufferStrategy();
         g2 = (Graphics2D) bs.getDrawGraphics();
+
+        testButton=new Button(100,100,100,100,g2);
+        testButton.setAction(new Runnable() {
+            @Override
+            public void run() {
+                testButton.c1+=10;
+                testButton.c2+=10;
+                testButton.c3+=10;
+            }
+        });
+
         new Timer(20, e -> {
             update();
             draw();
@@ -120,9 +135,7 @@ public class UICanvas extends Canvas {
         /*
         YOUR FUKKEN RENDER
          */
-        Button testButton=new Button(100,100,100,100,g2);
         testButton.draw();
-
 
 
         bs.show();
