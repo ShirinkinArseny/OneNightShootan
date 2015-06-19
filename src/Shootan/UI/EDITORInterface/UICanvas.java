@@ -7,7 +7,10 @@ import java.awt.image.BufferStrategy;
 
 public class UICanvas extends Canvas {
     Button buttons[]=new Button[20];
-    int kOfButtons;
+    Block blocks[]=new Block[1024];
+    int kOfButtons, kOfBlocks=0;
+    double lx,ly,delta;
+
     public UICanvas() {
         super();
 
@@ -29,6 +32,18 @@ public class UICanvas extends Canvas {
         addMouseMotionListener(new MouseMotionListener() {
             @Override
             public void mouseDragged(MouseEvent e) {
+                int x=e.getX(), y=e.getY();
+                boolean cross=false;
+                for(int i=0;i<kOfBlocks;i++){
+                    if (!cross){
+                        cross=blocks[i].cross(x,y);
+                    }
+                }
+                if (!cross){
+                    kOfBlocks+=1;
+                    blocks[kOfBlocks-1]=new Block(x,y);
+                }
+
             }
 
             @Override
@@ -47,6 +62,8 @@ public class UICanvas extends Canvas {
 
             @Override
             public void mousePressed(MouseEvent e) {
+                lx=e.getX();
+                ly=e.getY();
             }
 
             @Override
@@ -98,7 +115,7 @@ public class UICanvas extends Canvas {
         g2 = (Graphics2D) bs.getDrawGraphics();
         kOfButtons=2;
         for(int i=0;i<kOfButtons;i++){
-            buttons[i]=new Button(5,100+i*20,100,20,i,g2);
+            buttons[i]=new Button(5,100+i*20,100,20,i);
         }
         buttons[0].setAction(new Runnable() {
             @Override
@@ -148,7 +165,10 @@ public class UICanvas extends Canvas {
         YOUR FUKKEN RENDER
          */
         for(int i=0;i<kOfButtons;i++){
-            buttons[i].draw();
+            buttons[i].draw(g2);
+        }
+        for(int i=0;i<kOfBlocks;i++){
+            blocks[i].draw(g2);
         }
 
 
