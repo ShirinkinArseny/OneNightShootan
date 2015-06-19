@@ -13,6 +13,7 @@ public class UICanvas extends Canvas {
         addKeyListener(new KeyListener() {
             @Override
             public void keyTyped(KeyEvent e) {
+
             }
 
             @Override
@@ -37,6 +38,7 @@ public class UICanvas extends Canvas {
         addMouseListener(new MouseListener() {
             @Override
             public void mouseClicked(MouseEvent e) {
+                
             }
 
             @Override
@@ -112,12 +114,16 @@ public class UICanvas extends Canvas {
         g2.setRenderingHint(RenderingHints.KEY_TEXT_ANTIALIASING,
                 RenderingHints.VALUE_TEXT_ANTIALIAS_ON);
 
-        g2.setColor(new Color(0, 0, 0));
+        g2.setColor(new Color(180, 180, 180));
         g2.fillRect(0, 0, getWidth(), getHeight());
 
         /*
         YOUR FUKKEN RENDER
          */
+        Button testButton=new Button(100,100,100,100,g2);
+        testButton.draw();
+
+
 
         bs.show();
     }
