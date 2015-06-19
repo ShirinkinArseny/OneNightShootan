@@ -1,4 +1,4 @@
-package Shootan.UI.EDITORInterface.AWTInterface;
+package Shootan.UI.EDITORInterface;
 
 import javax.swing.*;
 
