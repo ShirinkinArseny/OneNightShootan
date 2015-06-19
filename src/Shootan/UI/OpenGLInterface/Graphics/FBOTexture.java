@@ -3,6 +3,7 @@ package Shootan.UI.OpenGLInterface.Graphics;
 import Shootan.UI.OpenGLInterface.Main;
 
 import java.nio.ByteBuffer;
+import java.util.ArrayList;
 
 import static Shootan.UI.OpenGLInterface.Util.Utils.checkForGLError;
 import static Shootan.UI.OpenGLInterface.Util.Utils.processError;
@@ -12,6 +13,14 @@ import static org.lwjgl.opengl.GL30.*;
 
 public class FBOTexture extends AbstractTexture {
 
+    private static ArrayList<FBOTexture> fboTextures=new ArrayList<>();
+    public static void disposeAll() {
+
+        while (fboTextures.size()!=0) {
+            fboTextures.get(0).dispose();
+        }
+
+    }
 
     private int fboId;
     private int width;
@@ -55,6 +64,7 @@ public class FBOTexture extends AbstractTexture {
         glBindFramebuffer(GL_FRAMEBUFFER, 0);
 
         System.out.println("Created FBO texture "+width+"x"+height+", id: "+fboId);
+        fboTextures.add(this);
     }
 
     private static int bindedFBO=0;
@@ -82,5 +92,6 @@ public class FBOTexture extends AbstractTexture {
     public void dispose() {
         glDeleteFramebuffers(fboId);
         glDeleteTextures(getTextureId());
+        fboTextures.remove(this);
     }
 }

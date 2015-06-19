@@ -1,6 +1,7 @@
 package Shootan.GameEssences.Units;
 
 import Shootan.AI.AI;
+import Shootan.TimeFunctions.LinearAIMer;
 import Shootan.Utils.IndexWrapper;
 import Shootan.GameEssences.Weapon.*;
 
@@ -25,6 +26,17 @@ public abstract class Unit implements ControlledUnit {
     private float damageCoef;
 
     private AI ai;
+
+    private LinearAIMer aimerX;
+    private LinearAIMer aimerY;
+
+    public float getTimeApproxX() {
+        return aimerX.getValue();
+    }
+
+    public float getTimeApproxY() {
+        return aimerY.getValue();
+    }
 
     public AI getAI() {
         return ai;
@@ -67,7 +79,9 @@ public abstract class Unit implements ControlledUnit {
     public void fullDeserialiseIgnoringOpinion(List<Byte> input, IndexWrapper index) {
         try {
             x = fourBytesToCoord(input, index);
+            aimerX.aim(x);
             y = fourBytesToCoord(input, index);
+            aimerY.aim(y);
             health = twoBytesToNormalisedFloat(input, index);
 
             {
@@ -98,7 +112,9 @@ public abstract class Unit implements ControlledUnit {
             IGNORING ID AND TYPE - THEY ARE ALREADY USED
              */
             x = fourBytesToCoord(input, index);
+            aimerX.aim(x);
             y = fourBytesToCoord(input, index);
+            aimerY.aim(y);
             health = twoBytesToNormalisedFloat(input, index);
 
             currentWeapon = input.get(index.value++);
@@ -221,6 +237,8 @@ public abstract class Unit implements ControlledUnit {
     public Unit(float x, float y, float radius, float speed, float damageCoef) {
         this.x=x;
         this.y=y;
+        aimerX=new LinearAIMer(x, 0.05f);
+        aimerY=new LinearAIMer(y, 0.05f);
         this.radius=radius;
         radiusQuad=radius*radius;
         this.speed=speed;
@@ -246,7 +264,9 @@ public abstract class Unit implements ControlledUnit {
 
     public void move(float dt, boolean acceptDx, boolean acceptDy) {
         if (acceptDx) x += dt * dx;
+        aimerX.aim(x);
         if (acceptDy) y += dt * dy;
+        aimerY.aim(y);
     }
 
     public float getHealth() {
@@ -299,10 +319,12 @@ public abstract class Unit implements ControlledUnit {
 
     public void setX(int x) {
         this.x = x;
+        aimerX.aim(x);
     }
 
     public void setY(int y) {
         this.y = y;
+        aimerY.aim(y);
     }
 
     public void setHealth(float health) {

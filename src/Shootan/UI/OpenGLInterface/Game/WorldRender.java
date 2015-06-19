@@ -5,6 +5,7 @@ import Shootan.GameEssences.Bullets.Bullet;
 import Shootan.UI.OpenGLInterface.Graphics.AbstractTexture;
 import Shootan.UI.OpenGLInterface.Graphics.FBOTexture;
 import Shootan.UI.OpenGLInterface.Graphics.Shader;
+import Shootan.UI.OpenGLInterface.Main;
 import Shootan.UI.OpenGLInterface.Math.Matrix4f;
 import Shootan.GameEssences.Units.Unit;
 import Shootan.Worlds.ClientWorld;
@@ -20,21 +21,33 @@ public class WorldRender {
     private ClientWorld world;
     private Camera camera;
 
+    /*
+    Lightning
+     */
     private FBOTexture hardBlocksBuffer;
+    private FBOTexture lampLightMapBuffer;
     private FBOTexture linearShadowsBuffer;
     private FBOTexture angledShadowBuffer;
     private FBOTexture fovBuffer;
+    private FBOTexture lightenedScene;
+    private FBOTexture scene;
+    private FBOTexture additiveBlend;
 
-    private FBOTexture lamp;
+    /*
+    User UI
+     */
+    private FBOTexture hudBuffer;
 
+    /*
+    Blur
+     */
     private FBOTexture hblur;
     private FBOTexture vblur;
 
-    private FBOTexture result;
-
-    private FBOTexture scene;
-
-    private FBOTexture additiveBlend;
+    /*
+    Result framebuffer
+     */
+    private FBOTexture finalFrame;
 
     private FBORenderer screen;
 
@@ -49,9 +62,12 @@ public class WorldRender {
         this.world = world;
         this.camera = camera;
 
+        finalFrame=new FBOTexture(Main.width, Main.height);
+        hudBuffer=new FBOTexture(Main.width, Main.height);
+
         scene=new FBOTexture(fboSize, fboSize);
 
-        result=new FBOTexture(fboSize, fboSize);
+        lightenedScene =new FBOTexture(fboSize, fboSize);
 
         hblur = new FBOTexture(fboSize, fboSize);
         vblur = new FBOTexture(fboSize, fboSize);
@@ -63,11 +79,11 @@ public class WorldRender {
 
         angledShadowBuffer = new FBOTexture(fboSize/2, 1);
         fovBuffer = new FBOTexture(fboSize/2, fboSize/2);
-        lamp= new FBOTexture(fboSize/2, fboSize/2);
+        lampLightMapBuffer = new FBOTexture(fboSize/2, fboSize/2);
 
         screen = new FBORenderer();
 
-        fontRenderer=new FontRenderer(0.6f, 0.6f);
+        fontRenderer=new FontRenderer(0.7f, 0.35f);
 
         mapRenderer=new MapRenderer(world);
 
@@ -75,10 +91,7 @@ public class WorldRender {
     }
 
     public void dispose() {
-        hardBlocksBuffer.dispose();
-        linearShadowsBuffer.dispose();
-        angledShadowBuffer.dispose();
-        fovBuffer.dispose();
+        FBOTexture.disposeAll();
     }
 
     private HumanRenderer player = new HumanRenderer();
@@ -100,19 +113,19 @@ public class WorldRender {
     private void drawUnit(Unit u) {
 
         if (world.isVisible(
-                (int)u.getX(),
-                (int)u.getY())) {
+                (int)u.getTimeApproxX(),
+                (int)u.getTimeApproxY())) {
 
             player.bind();
-            player.render(u.getX(), u.getY(), u.getViewAngle());
+            player.render(u.getTimeApproxX(), u.getTimeApproxY(), u.getViewAngle());
             player.unbind();
 
-            fontRenderer.render(getUnitState(u), u.getX(), u.getY());
+            fontRenderer.render(getUnitState(u), u.getTimeApproxX(), u.getTimeApproxY());
         }
     }
 
     private void drawBullet(Bullet b) {
-        if (world.isVisible((int) b.getX(), (int) b.getY())) {
+        if (world.isVisible((int) b.getTimeApproxX(), (int) b.getTimeApproxY())) {
             bulletRenderer.render(b);
         }
     }
@@ -130,14 +143,15 @@ public class WorldRender {
 
             mapRenderer.render(0, 0);
 
+            world.getBullets().forEach(this::drawBullet);
+
             world.getUnits()
                     .stream()
                     .filter(u -> u.getId() != world.getMe().getId())
-                    .filter(u -> world.isVisible((int) u.getX(), (int) u.getY()))
+                    .filter(u -> world.isVisible((int) u.getTimeApproxX(), (int) u.getTimeApproxY()))
                     .forEach(this::drawUnit);
             drawUnit(world.getMe());
 
-            world.getBullets().forEach(this::drawBullet);
             Shader.defaultShader.disable();
 
             scene.unbindForWriting();
@@ -177,7 +191,7 @@ public class WorldRender {
         hardBlock.bind();
         Shader.rollShadows.enable();
         camera.lookAtFBOCenter();
-        screen.render(Matrix4f.IDENTITY, Shader.rollShadows);
+        screen.render(Matrix4f.IDENTITY);
         Shader.rollShadows.disable();
         hardBlock.unbind();
         linearShadowsBuffer.unbindForWriting();
@@ -191,7 +205,7 @@ public class WorldRender {
         linearShadowsBuffer.bind();
         Shader.angleShadows.enable();
         camera.lookAtFBOCenter();
-        screen.render(Matrix4f.IDENTITY, Shader.angleShadows);
+        screen.render(Matrix4f.IDENTITY);
         Shader.angleShadows.disable();
         linearShadowsBuffer.unbind();
         angledShadowBuffer.unbindForWriting();
@@ -207,8 +221,7 @@ public class WorldRender {
         Shader.unrollShadows.setUniform1f(unrollShaderColorG, g);
         Shader.unrollShadows.setUniform1f(unrollShaderColorB, b);
         camera.lookAtFBOCenter();
-        screen.render(-(world.getMe().getX()-x)*9/16, world.getMe().getY()-y,
-                Shader.unrollShadows);
+        screen.render(-(world.getMe().getTimeApproxX()-x)*9/16, world.getMe().getTimeApproxY()-y);
         Shader.unrollShadows.disable();
         angledShadowBuffer.unbind();
         result.unbindForWriting();
@@ -226,7 +239,7 @@ public class WorldRender {
         img.bind();
         Shader.hblur.enable();
         camera.lookAtFBOCenter();
-        screen.render(Matrix4f.IDENTITY, Shader.hblur);
+        screen.render(Matrix4f.IDENTITY);
         Shader.hblur.disable();
         img.unbind();
         hblur.unbindForWriting();
@@ -239,7 +252,7 @@ public class WorldRender {
         hblur.bind();
         Shader.vblur.enable();
         camera.lookAtFBOCenter();
-        screen.render(Matrix4f.IDENTITY, Shader.vblur);
+        screen.render(Matrix4f.IDENTITY);
         Shader.vblur.disable();
         hblur.unbind();
         vblur.unbindForWriting();
@@ -262,21 +275,21 @@ public class WorldRender {
     private void renderLightSource(float x, float y, float r, float g, float b) {
 
 
-        if (Math.abs(x-world.getMe().getX())>=Camera.intSize*2 || Math.abs(y-world.getMe().getY())>=Camera.intSize*2) {
+        if (Math.abs(x-world.getMe().getTimeApproxX())>=Camera.intSize*2 || Math.abs(y-world.getMe().getTimeApproxY())>=Camera.intSize*2) {
             return;
         }
 
         lightning.tick();
-        renderLightMap(lamp, x, y, r, g, b);
+        renderLightMap(lampLightMapBuffer, x, y, r, g, b);
 
         additiveBlend.bindForWriting();
 
-        lamp.bind();
+        lampLightMapBuffer.bind();
         Shader.defaultShader.enable();
         camera.lookAtFBOCenter();
-        screen.render(Matrix4f.IDENTITY, Shader.defaultShader);
+        screen.render(Matrix4f.IDENTITY);
         Shader.defaultShader.disable();
-        lamp.unbind();
+        lampLightMapBuffer.unbind();
 
         additiveBlend.unbindForWriting();
 
@@ -294,23 +307,31 @@ public class WorldRender {
     }
 
     private void applyFov() {
-        renderLightMap(fovBuffer, world.getMe().getX(), world.getMe().getY(), 1f, 1f, 1f);
 
-        Shader.multiplyColors.enable();
-        camera.lookAtFBOCenter();
+        renderLightMap(fovBuffer, world.getMe().getTimeApproxX(), world.getMe().getTimeApproxY(), 1f, 1f, 1f);
 
-        result.bind();
-        fovBuffer.bindToSecond();
-        screen.render(Matrix4f.IDENTITY, Shader.multiplyColors);
-        fovBuffer.unbindFromSecond();
-        result.unbind();
 
-        Shader.multiplyColors.disable();
+        finalFrame.bindForWriting();
+            Shader.multiplyColors.enable();
+            camera.lookAtFBOCenter();
+
+            lightenedScene.bind();
+            fovBuffer.bindToSecond();
+            screen.render(Matrix4f.IDENTITY);
+            fovBuffer.unbindFromSecond();
+            lightenedScene.unbind();
+
+            Shader.multiplyColors.disable();
+        finalFrame.unbindForWriting();
     }
 
     private void drawHUD() {
+        hudBuffer.bindForWriting();
         Shader.defaultShader.enable();
-        camera.lookAtScreenCenter();
+        camera.lookAtFBOCenter();
+
+        glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
+        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
         fontRenderer.render(
                 world.getMe().getWeapon().getName()+" "+
@@ -323,6 +344,17 @@ public class WorldRender {
                 , -10, -9);
 
         Shader.defaultShader.disable();
+        hudBuffer.unbindForWriting();
+
+        finalFrame.bindForWriting();
+            Shader.defaultShader.enable();
+            camera.lookAtScreenCenter();
+            hudBuffer.bind();
+            screen.render(Matrix4f.IDENTITY);
+            hudBuffer.unbind();
+            Shader.defaultShader.disable();
+        finalFrame.unbindForWriting();
+
     }
 
     private void drawLightSources() {
@@ -360,17 +392,17 @@ public class WorldRender {
                     if (light[0]>1f || light[1]>1f || light[2]>1f) {
                         new Exception("Lightsource >1f").printStackTrace();
                     }
-                    renderLightSource(b.getX(), b.getY(), light[0], light[1], light[2]);
+                    renderLightSource(b.getTimeApproxX(), b.getTimeApproxY(), light[0], light[1], light[2]);
                     lightSources[0]++;
                 });
-        renderLightSource(world.getMe().getX(), world.getMe().getY(), 0.1f, 0.1f, 0.1f);
+        renderLightSource(world.getMe().getTimeApproxX(), world.getMe().getTimeApproxY(), 0.1f, 0.1f, 0.1f);
         lightSources[0]++;
 
         //System.out.println("Lightsources: "+lightSources[0]);
     }
 
     private void applyLightning() {
-        result.bindForWriting();
+        lightenedScene.bindForWriting();
         glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
         scene.bind();
@@ -378,13 +410,13 @@ public class WorldRender {
 
         Shader.multiplyColors.enable();
         camera.lookAtFBOCenter();
-        screen.render(Matrix4f.IDENTITY, Shader.multiplyColors);
+        screen.render(Matrix4f.IDENTITY);
         Shader.multiplyColors.disable();
 
         additiveBlend.unbindFromSecond();
         scene.unbind();
 
-        result.unbindForWriting();
+        lightenedScene.unbindForWriting();
     }
 
     Benchmark render=new Benchmark("Render", true);
@@ -393,7 +425,7 @@ public class WorldRender {
 
         render.tick();
 
-        camera.setPlayerPosition(world.getMe().getX(), world.getMe().getY());
+        camera.setPlayerPosition(world.getMe().getTimeApproxX(), world.getMe().getTimeApproxY());
 
         renderWorld();
         drawLightSources();
@@ -402,6 +434,12 @@ public class WorldRender {
         applyFov();
         drawHUD();
 
+        Shader.defaultShader.enable();
+        camera.lookAtFBOCenter();
+        finalFrame.bind();
+        screen.render(Matrix4f.IDENTITY);
+        scene.unbind();
+        Shader.defaultShader.disable();
 
 
         render.tack();

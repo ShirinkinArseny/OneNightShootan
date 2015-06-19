@@ -1,17 +1,14 @@
 package Shootan.Worlds;
 
-import Shootan.AI.GeneticAI;
 import Shootan.GameEssences.Bullets.Bullet;
 import Shootan.GameEssences.Units.Human;
 import Shootan.GameEssences.Units.Unit;
-import Shootan.GameEssences.Units.VisibleUnit;
 import Shootan.ServerConfigs;
 import Shootan.Utils.IndexWrapper;
 
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.concurrent.CopyOnWriteArrayList;
-import java.util.stream.Collectors;
 
 import static Shootan.Utils.ByteUtils.*;
 
@@ -243,11 +240,6 @@ public class ServerWorld extends StrangeWorld {
         return response;
     }
 
-
-
-    private static final long roundTime=10000;
-    private long startTime;
-
     public ServerWorld() {
         super();
 
@@ -256,12 +248,12 @@ public class ServerWorld extends StrangeWorld {
             units.add(new Human(10, 10));
 
         for (Unit u: units) {
-            u.bindAI(new GeneticAI());
+            u.bindAI((me, visibleUnits, world) -> {
+
+            });
         }
         frags=new int[units.size()];
         deaths=new int[units.size()];
         dropStat();
-
-        startTime=System.currentTimeMillis();
     }
 }

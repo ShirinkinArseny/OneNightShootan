@@ -60,7 +60,7 @@ public class BulletRenderer {
 
 
 			Shader.getCurrentShader().setUniformMat4f(Shader.getCurrentShader().modelMatrixUniformId,
-					Matrix4f.translate(bullet.getX(), bullet.getY(), 0).multiply(Matrix4f.getRotated(bullet.getAngle())));
+					Matrix4f.translate(bullet.getTimeApproxX(), bullet.getTimeApproxY(), 0).multiply(Matrix4f.getRotated(bullet.getAngle())));
 
 		VAO.render();
 

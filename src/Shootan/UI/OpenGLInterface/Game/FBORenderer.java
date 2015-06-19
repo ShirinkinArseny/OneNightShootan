@@ -40,13 +40,13 @@ public class FBORenderer {
 	public FBORenderer() {
 	}
 
-	public void render(Matrix4f position, Shader s) {
-		s.setUniformMat4f(s.modelMatrixUniformId, position);
+	public void render(Matrix4f position) {
+		Shader.getCurrentShader().setUniformMat4f(Shader.getCurrentShader().modelMatrixUniformId, position);
 		VAO.render();
 	}
 
-		public void render(float x, float y, Shader s) {
-		s.setUniformMat4f(s.modelMatrixUniformId, Matrix4f.translate(x, y, 0));
+		public void render(float x, float y) {
+			Shader.getCurrentShader().setUniformMat4f(Shader.getCurrentShader().modelMatrixUniformId, Matrix4f.translate(x, y, 0));
 		VAO.render();
 	}
 

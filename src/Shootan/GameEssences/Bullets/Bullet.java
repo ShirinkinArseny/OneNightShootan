@@ -1,5 +1,6 @@
 package Shootan.GameEssences.Bullets;
 
+import Shootan.TimeFunctions.LinearAIMer;
 import Shootan.Utils.IndexWrapper;
 
 import java.util.ArrayList;
@@ -24,6 +25,17 @@ public abstract class Bullet {
     protected int author;
 
     private static int typeRegistrator=0;
+
+    private LinearAIMer aimerX;
+    private LinearAIMer aimerY;
+
+    public float getTimeApproxX() {
+        return aimerX.getValue();
+    }
+
+    public float getTimeApproxY() {
+        return aimerY.getValue();
+    }
 
     protected static int registerType() {
         typeRegistrator++;
@@ -73,6 +85,13 @@ public abstract class Bullet {
         this.dy= (float) (Math.sin(angle)*speed);
         x=fourBytesToCoord(data, index);
         y=fourBytesToCoord(data, index);
+        if (aimerX==null || aimerY==null) {
+            aimerX=new LinearAIMer(x, 0.06f);
+            aimerY=new LinearAIMer(y, 0.06f);
+        } else {
+            aimerX.aim(x);
+            aimerY.aim(y);
+        }
     }
 
     public static Bullet createDeserialized(List<Byte> data, IndexWrapper index, int id) {
@@ -106,6 +125,8 @@ public abstract class Bullet {
         this.author = author;
         this.x = x;
         this.y = y;
+        aimerX=new LinearAIMer(x, 0.06f);
+        aimerY=new LinearAIMer(y, 0.06f);
         this.dx= (float) (Math.cos(angle)*speed);
         this.dy= (float) (Math.sin(angle)*speed);
         this.angle = angle;
@@ -119,7 +140,9 @@ public abstract class Bullet {
         float way=deltaTime*speed;
         hasDistance-=way;
         x+=dx*deltaTime;
+        aimerX.aim(x);
         y+=dy*deltaTime;
+        aimerY.aim(y);
     }
 
     public boolean hasFallen() {
