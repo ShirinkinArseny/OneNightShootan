@@ -13,7 +13,7 @@ public class Button {
         this.y=y;
         this.width=width;
         this.height=height;
-        name="button"+number;
+        name="button"+(number+1);
     }
 
     protected void draw(Graphics2D g2){
