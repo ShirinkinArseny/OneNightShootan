@@ -140,21 +140,34 @@ public class UICanvas extends Canvas {
                     System.err.println("Неверный формат второй строки, мать ее шесть раз");
                 }
                 if((sizeX!=0)&&(sizeY!=0)){
-                    chosen=new Activity(2,0,0,0,getWidth(), getHeight(), sizeX,sizeY, g2);
+                    chosen=new Activity(3,0,0,0,getWidth(), getHeight(), sizeX,sizeY, g2);
                     chosen.buttons[0].setAction(new Runnable() {
                         @Override
                         public void run() {
                             typeOfBrush="brick";
+                            chosen.resetButtons();
+                            chosen.setNewColor(0);
                         }
                     });
                     chosen.buttons[0].name="Brick";
                     chosen.buttons[1].setAction(new Runnable() {
                         @Override
                         public void run() {
-                            typeOfBrush="erase";
+                            typeOfBrush = "light";
+                            chosen.resetButtons();
+                            chosen.setNewColor(1);
                         }
                     });
-                    chosen.buttons[1].name="Erase";
+                    chosen.buttons[1].name="Light";
+                    chosen.buttons[2].setAction(new Runnable() {
+                        @Override
+                        public void run() {
+                            typeOfBrush="erase";
+                            chosen.resetButtons();
+                            chosen.setNewColor(2);
+                        }
+                    });
+                    chosen.buttons[2].name="Erase";
                 }
             }
         });

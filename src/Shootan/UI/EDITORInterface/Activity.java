@@ -56,7 +56,7 @@ public class Activity {
     protected void mouseClick(int x, int y, String brush){
         for(int i=0;i<kOfButtons;i++)
             if(buttons[i].clicked(x,y)) {
-                buttons[i].dosmth();
+                buttons[i].onClick();
             }
         for(int i=0;i<kOfText;i++) {
             text[i].chosen = text[i].clicked(x, y);
@@ -89,5 +89,15 @@ public class Activity {
         if(blocksV){
             field.mouseClick(x,y,brush);
         }
+    }
+
+    protected void resetButtons(){
+        for(int i=0;i<kOfButtons;i++){
+            buttons[i].color=new Color(255,255,255);
+        }
+    }
+
+    protected void setNewColor(int i){
+        buttons[i].color=new Color(170,170,170);
     }
 }
