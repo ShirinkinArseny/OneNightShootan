@@ -103,7 +103,7 @@ public class UICanvas extends Canvas {
         createBufferStrategy(3);
         bs = getBufferStrategy();
         g2 = (Graphics2D) bs.getDrawGraphics();
-        chosen=new Activity(1,2,0,0,getWidth(), getHeight(),false,g2);
+        chosen=new Activity(1,2,0,0,getWidth(), getHeight(), g2);
 
         chosen.buttons[0].name="OK";
         chosen.buttons[0].setAction(new Runnable() {
@@ -120,7 +120,7 @@ public class UICanvas extends Canvas {
                     System.err.println("Неверный формат второй строки, мать ее шесть раз");
                 }
                 if((sizeX!=0)&&(sizeY!=0)){
-                    chosen=new Activity(1,0,0,0,getWidth(), getHeight(), true, g2);
+                    chosen=new Activity(1,0,0,0,getWidth(), getHeight(), sizeX,sizeY, g2);
                     chosen.buttons[0].setAction(new Runnable() {
                         @Override
                         public void run() {
