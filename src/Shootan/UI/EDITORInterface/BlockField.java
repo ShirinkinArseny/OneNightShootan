@@ -39,15 +39,26 @@ public class BlockField {
             g2.drawLine(leftB+size*i,upB,leftB+size*i,upB+size*height);
         }
         for(int i=0;i<height;i++){
-            for(int j=0;j<height;j++){
+            for(int j=0;j<width;j++){
                 blocks[i][j].draw(g2);
             }
         }
     }
 
-    protected void mouseClick(int x, int y){
-        if(blocks[(y-upB)/size][(x-leftB)/size].value=='n'){
-            blocks[(y-upB)/size][(x-leftB)/size].clickedL();
+    protected void mouseClick(int x, int y, String brush){
+        if((x>=leftB)&&(x<=leftB+size*width)&&(y>=upB)&&(y<=upB+size*height)){
+            switch (brush){
+                case "erase":
+                    if(blocks[(y-upB)/size][(x-leftB)/size].value!='n'){
+                        blocks[(y-upB)/size][(x-leftB)/size].clickedR();
+                    }
+                    break;
+                case "brick":
+                    if(blocks[(y-upB)/size][(x-leftB)/size].value=='n'){
+                        blocks[(y-upB)/size][(x-leftB)/size].clickedL();
+                    }
+                    break;
+            }
         }
     }
 

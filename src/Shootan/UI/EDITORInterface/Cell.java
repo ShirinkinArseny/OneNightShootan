@@ -1,6 +1,5 @@
 package Shootan.UI.EDITORInterface;
 
-import org.lwjgl.Sys;
 
 import java.awt.*;
 import java.awt.image.BufferedImage;

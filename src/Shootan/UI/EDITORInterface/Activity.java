@@ -4,7 +4,7 @@ package Shootan.UI.EDITORInterface;
 import java.awt.*;
 
 public class Activity {
-    int width,height,x,y,kOfButtons, kOfText, kOfBlocks=0;
+    int width,height,x,y,kOfButtons, kOfText;
     Button buttons[]=new Button[20];
     TextField text[]=new TextField[10];
     BlockField field;
@@ -53,7 +53,7 @@ public class Activity {
         }
     }
 
-    protected void mouseClick(int x, int y){
+    protected void mouseClick(int x, int y, String brush){
         for(int i=0;i<kOfButtons;i++)
             if(buttons[i].clicked(x,y)) {
                 buttons[i].dosmth();
@@ -63,31 +63,31 @@ public class Activity {
         }
         if(blocksV) {
             //расставляем блоки
-            field.mouseClick(x,y);
+            field.mouseClick(x,y,brush);
         }
     }
 
     protected void keyPressed(char key, int code){
         for(int i=0;i<kOfText;i++){
             if(text[i].chosen){
-                if(code!=8) {
+                if(((key>='a')&&(key<='z'))||((key>='а')&&(key<='я'))||((key>='0')&&(key<='9'))) {
                     text[i].value += key;
                 }else {
-                    try{
-                        text[i].value=text[i].value.substring(0,text[i].value.length()-1);
-                    }catch(StringIndexOutOfBoundsException e){
-
+                    if(code==8) {
+                        try {
+                            text[i].value = text[i].value.substring(0, text[i].value.length() - 1);
+                        } catch (StringIndexOutOfBoundsException e) {
+                            System.out.println("Все ок, эт не ошибка");
+                        }
                     }
                 }
             }
         }
     }
 
-    protected void mouseDragged(int x, int y){
-        boolean cross=false;
-        if((blocksV)&&(x>=200)) {
-            //И тут расставляем блоки
-            field.mouseClick(x,y);
+    protected void mouseDragged(int x, int y, String brush){
+        if(blocksV){
+            field.mouseClick(x,y,brush);
         }
     }
 }
