@@ -7,7 +7,7 @@ import java.awt.image.BufferStrategy;
 
 public class UICanvas extends Canvas {
     int sizeX=0, sizeY=0;
-    Activity chosen;
+    Activity currentActivity;
     String typeOfBrush="Brick";
 
 
@@ -22,31 +22,7 @@ public class UICanvas extends Canvas {
 
             @Override
             public void keyPressed(KeyEvent e) {
-                char symb=e.getKeyChar();
-                int code=e.getKeyCode();
-                if(code!=10){
-                    chosen.keyPressed(symb,code);
-                }else{
-                    try {
-                        sizeX=Integer.valueOf(chosen.text[0].value);
-                    }catch (NumberFormatException ex) {
-                        System.err.println("Неверный формат первой строки, мать ее три раза");
-                    }
-                    try {
-                        sizeY=Integer.valueOf(chosen.text[1].value);
-                    }catch (NumberFormatException ex) {
-                        System.err.println("Неверный формат второй строки, мать ее шесть раз");
-                    }
-                    if((sizeX!=0)&&(sizeY!=0)){
-                        chosen=new Activity(1,0,0,0,getWidth(), getHeight(), sizeX,sizeY, g2);
-                        chosen.buttons[0].setAction(new Runnable() {
-                            @Override
-                            public void run() {
-                                typeOfBrush="Brick";
-                            }
-                        });
-                    }
-                }
+                currentActivity.processKeyBoardEvent(e.getKeyChar());
             }
 
             @Override
@@ -57,8 +33,7 @@ public class UICanvas extends Canvas {
         addMouseMotionListener(new MouseMotionListener() {
             @Override
             public void mouseDragged(MouseEvent e) {
-                int x=e.getX(), y=e.getY();
-                chosen.mouseDragged(x,y,typeOfBrush);
+                currentActivity.processMousePress(e.getX(), e.getY());
             }
 
             @Override
@@ -69,7 +44,7 @@ public class UICanvas extends Canvas {
         addMouseListener(new MouseListener() {
             @Override
             public void mouseClicked(MouseEvent e) {
-                chosen.mouseClick(e.getX(),e.getY(),typeOfBrush);
+                currentActivity.processMousePress(e.getX(), e.getY());
             }
 
             @Override
@@ -117,63 +92,41 @@ public class UICanvas extends Canvas {
         });
     }
 
-
-
     public void start() {
         createBufferStrategy(3);
         bs = getBufferStrategy();
         g2 = (Graphics2D) bs.getDrawGraphics();
-        chosen=new Activity(1,2,0,0,getWidth(), getHeight(), g2);
 
-        chosen.buttons[0].name="OK";
-        chosen.buttons[0].setAction(new Runnable() {
-            @Override
-            public void run() {
-                try {
-                    sizeX=Integer.valueOf(chosen.text[0].value);
-                }catch (NumberFormatException e) {
-                    System.err.println("Неверный формат первой строки, мать ее три раза");
-                }
-                try {
-                    sizeY=Integer.valueOf(chosen.text[1].value);
-                }catch (NumberFormatException e) {
-                    System.err.println("Неверный формат второй строки, мать ее шесть раз");
-                }
-                if((sizeX!=0)&&(sizeY!=0)){
-                    chosen=new Activity(3,0,0,0,getWidth(), getHeight(), sizeX,sizeY, g2);
-                    chosen.buttons[0].setAction(new Runnable() {
-                        @Override
-                        public void run() {
-                            typeOfBrush="brick";
-                            chosen.resetButtons();
-                            chosen.setNewColor(0);
-                        }
-                    });
-                    chosen.buttons[0].name="Brick";
-                    chosen.buttons[1].setAction(new Runnable() {
-                        @Override
-                        public void run() {
-                            typeOfBrush = "light";
-                            chosen.resetButtons();
-                            chosen.setNewColor(1);
-                        }
-                    });
-                    chosen.buttons[1].name="Light";
-                    chosen.buttons[2].setAction(new Runnable() {
-                        @Override
-                        public void run() {
-                            typeOfBrush="erase";
-                            chosen.resetButtons();
-                            chosen.setNewColor(2);
-                        }
-                    });
-                    chosen.buttons[2].name="Erase";
-                }
+        currentActivity =new Activity(0,0,getWidth(), getHeight());
+        TextField mapWidth=new TextField(0, 0, "Map width");
+        TextField mapHeight=new TextField(0, 25, "Map height");
+        Button acceptMapSize=new Button(0, 50, "Accept size");
+
+        currentActivity.addControl(mapWidth).addControl(mapHeight).addControl(acceptMapSize);
+
+        acceptMapSize.setAction(() -> {
+
+            if (!mapWidth.getText().matches("[0-9]+") || !mapHeight.getText().matches("[0-9]+")) {
+                new Exception("Неверный формат строки, мать ее N раз").printStackTrace();
+            } else {
+
+                sizeX = Integer.valueOf(mapWidth.getText());
+                sizeY = Integer.valueOf(mapHeight.getText());
+
+                currentActivity = new Activity(0, 0, getWidth(), getHeight());
+
+                Button brickButton=new Button(0, 0, "Brick");
+                brickButton.setAction(() -> typeOfBrush = "brick");
+
+                Button lightButton=new Button(0, 25, "Light");
+                lightButton.setAction(() -> typeOfBrush = "light");
+
+                Button eraseButton=new Button(0, 50, "Erase");
+                eraseButton.setAction(() -> typeOfBrush = "erase");
+
+                currentActivity.addControl(brickButton).addControl(lightButton).addControl(eraseButton);
             }
         });
-
-        chosen.text[0]=new TextField(20,20);
-        chosen.text[1]=new TextField(20,50);
 
         new Timer(20, e -> {
             update();
@@ -204,7 +157,7 @@ public class UICanvas extends Canvas {
         g2.setColor(new Color(180, 180, 180));
         g2.fillRect(0, 0, getWidth(), getHeight());
 
-        chosen.draw();
+        currentActivity.draw(g2);
 
         bs.show();
     }

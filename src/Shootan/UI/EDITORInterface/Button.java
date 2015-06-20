@@ -1,38 +1,22 @@
 package Shootan.UI.EDITORInterface;
 
+public class Button extends Control {
 
-import java.awt.*;
+    private Runnable onClickAction=null;
 
-public class Button {
-    int x,y,width,height;
-    Runnable action;
-    String name;
-    Color color=new Color(255,255,255);
-
-    public Button(int x,int y,int width,int height, int number){
-        this.x=x;
-        this.y=y;
-        this.width=width;
-        this.height=height;
-        name="button"+(number+1);
+    public Button(int x,int y, String text){
+        super(x, y, 100, 20, text);
     }
 
-    protected void draw(Graphics2D g2){
-        g2.setColor(color);
-        g2.fillRect(x,y,width,height);
-        g2.setColor(new Color(0,0,0));
-        g2.drawString(name,x+5,y+height/4*3);
+    public void setAction(Runnable r){
+        this.onClickAction=r;
     }
 
-    protected boolean clicked(int x, int y) {
-            return ((x > this.x) && (x < this.x + width) && (y > this.y) && (y < this.y + height));
+    public void processMousePress(int x, int y) {
+        if ((x > this.x) && (x < this.x + width) && (y > this.y) && (y < this.y + height)) {
+            if (onClickAction!=null)
+                onClickAction.run();
+        }
     }
 
-    protected void setAction(Runnable r){
-        this.action=r;
-    }
-
-    protected void onClick(){
-        action.run();
-    }
 }
