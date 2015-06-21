@@ -7,17 +7,16 @@ import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
 
-public class BlockField {
-    int width,height,windowX,windowY,leftB=400,upB=1,size;
+public class BlockField extends Control{
+    int width,height,leftB=400,upB=1,size;
     Cell[][] blocks;/** 'n' - пустая клетка, 'b' - блок **/
     BufferedImage brick, light;
 
     public BlockField(int x, int y, int wX, int wY){
+        super(400,wY-1,x*Math.min((wX-400)/x,(wY-1)/y),y*Math.min((wX-400)/x,(wY-1)/y),"");
+        size=Math.min((wX-leftB)/x,(wY-upB)/y);
         width=x;
         height=y;
-        windowX=wX;
-        windowY=wY;
-        size=Math.min((windowX-leftB)/width,(windowY-upB)/height);
         try {
             brick= ImageIO.read(new File("content/brick.png"));
         } catch (IOException e1) {
@@ -36,7 +35,9 @@ public class BlockField {
         }
     }
 
-    protected void draw(Graphics2D g2){
+    public void draw(Graphics2D g2){
+        super.draw(g2);
+        g2.setColor(new Color(10,10,10));
         for(int i=0;i<=height;i++){
             g2.drawLine(leftB,upB+size*i,leftB+size*width,upB+size*i);
         }
@@ -50,7 +51,7 @@ public class BlockField {
         }
     }
 
-    protected void mouseClick(int x, int y, String brush){
+    public void processMousePress(int x, int y, String brush){
         if((x>=leftB)&&(x<=leftB+size*width)&&(y>=upB)&&(y<=upB+size*height)){
             switch (brush){
                 case "erase":

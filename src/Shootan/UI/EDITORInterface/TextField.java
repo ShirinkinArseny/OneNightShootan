@@ -39,7 +39,7 @@ public class TextField extends Control {
         }
     }
 
-    public void processMousePress(int x, int y) {
+    public void processMousePress(int x, int y, String brush) {
         isSelected=getContainsPoint(x, y);
     }
 

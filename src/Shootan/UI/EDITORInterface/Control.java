@@ -6,7 +6,7 @@ public abstract class Control {
 
 
     protected int x,y,width,height;
-    protected String text;
+    protected String text, brush;
     protected static final Color backgroundColor=new Color(255,255,255);
     protected static final Color foregroundColor=new Color(0,0,0);
 
@@ -33,7 +33,7 @@ public abstract class Control {
 
     }
 
-    public void processMousePress(int x, int y) {
+    public void processMousePress(int x, int y, String brush) {
 
     }
 

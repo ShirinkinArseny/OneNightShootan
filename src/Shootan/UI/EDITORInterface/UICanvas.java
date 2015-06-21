@@ -97,7 +97,7 @@ public class UICanvas extends Canvas {
         bs = getBufferStrategy();
         g2 = (Graphics2D) bs.getDrawGraphics();
 
-        currentActivity =new Activity(0,0,getWidth(), getHeight());
+        currentActivity =new Activity(0,0,getWidth(), getHeight(), "");
         TextField mapWidth=new TextField(0, 0, "Map width");
         TextField mapHeight=new TextField(0, 25, "Map height");
         Button acceptMapSize=new Button(0, 50, "Accept size");
@@ -113,18 +113,20 @@ public class UICanvas extends Canvas {
                 sizeX = Integer.valueOf(mapWidth.getText());
                 sizeY = Integer.valueOf(mapHeight.getText());
 
-                currentActivity = new Activity(0, 0, getWidth(), getHeight());
+                currentActivity = new Activity(0, 0, getWidth(), getHeight(), "brick");
 
                 Button brickButton=new Button(0, 0, "Brick");
-                brickButton.setAction(() -> typeOfBrush = "brick");
+                brickButton.setAction(() -> currentActivity.setBrush("brick"));
 
                 Button lightButton=new Button(0, 25, "Light");
-                lightButton.setAction(() -> typeOfBrush = "light");
+                lightButton.setAction(() -> currentActivity.setBrush("light"));
 
                 Button eraseButton=new Button(0, 50, "Erase");
-                eraseButton.setAction(() -> typeOfBrush = "erase");
+                eraseButton.setAction(() -> currentActivity.setBrush("erase"));
 
-                currentActivity.addControl(brickButton).addControl(lightButton).addControl(eraseButton);
+                BlockField field=new BlockField(sizeX,sizeY,getWidth(),getHeight());
+
+                currentActivity.addControl(brickButton).addControl(lightButton).addControl(eraseButton).addControl(field);
             }
         });
 
