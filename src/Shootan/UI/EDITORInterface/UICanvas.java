@@ -8,7 +8,6 @@ import java.awt.image.BufferStrategy;
 public class UICanvas extends Canvas {
     int sizeX=0, sizeY=0;
     Activity currentActivity;
-    String typeOfBrush="Brick";
 
 
     public UICanvas() {
@@ -49,6 +48,7 @@ public class UICanvas extends Canvas {
 
             @Override
             public void mousePressed(MouseEvent e) {
+
             }
 
             @Override
@@ -57,39 +57,42 @@ public class UICanvas extends Canvas {
 
             @Override
             public void mouseEntered(MouseEvent e) {
-
             }
 
             @Override
             public void mouseExited(MouseEvent e) {
-
             }
         });
 
-        addMouseWheelListener(e -> {
-        });
-
-        addComponentListener(new ComponentListener() {
+        addMouseWheelListener(new MouseWheelListener() {
             @Override
-            public void componentResized(ComponentEvent e) {
-
-            }
-
-            @Override
-            public void componentMoved(ComponentEvent e) {
-
-            }
-
-            @Override
-            public void componentShown(ComponentEvent e) {
-
-            }
-
-            @Override
-            public void componentHidden(ComponentEvent e) {
-
+            public void mouseWheelMoved(MouseWheelEvent e) {
+                //уменьшение: 1, увеличение: -1
+                currentActivity.processMouseWheel(e.getX(), e.getY(),e.getWheelRotation());
             }
         });
+
+                addComponentListener(new ComponentListener() {
+                    @Override
+                    public void componentResized(ComponentEvent e) {
+
+                    }
+
+                    @Override
+                    public void componentMoved(ComponentEvent e) {
+
+                    }
+
+                    @Override
+                    public void componentShown(ComponentEvent e) {
+
+                    }
+
+                    @Override
+                    public void componentHidden(ComponentEvent e) {
+
+                    }
+                });
     }
 
     public void start() {
@@ -113,7 +116,6 @@ public class UICanvas extends Canvas {
                 sizeX = Integer.valueOf(mapWidth.getText());
                 sizeY = Integer.valueOf(mapHeight.getText());
 
-                
                 currentActivity = new Activity(0, 0, getWidth(), getHeight(), "brick");
 
                 Button brickButton=new Button(0, 0, "Brick");

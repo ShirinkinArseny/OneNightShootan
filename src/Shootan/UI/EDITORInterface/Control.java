@@ -41,6 +41,9 @@ public abstract class Control {
         return (x > this.x) && (x < this.x + width) && (y > this.y) && (y < this.y + height);
     }
 
+    public void processMouseWheel(int x, int y, int k){
+
+    }
 
 
 

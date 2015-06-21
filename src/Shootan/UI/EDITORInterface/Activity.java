@@ -23,6 +23,8 @@ public class Activity extends Control {
         return this;
     }
 
+
+
     public void draw(Graphics2D g2){
         for (Control c: controls) {
             c.draw(g2);
@@ -38,6 +40,13 @@ public class Activity extends Control {
     public void processMousePress(int x, int y) {
         for (Control c: controls) {
             c.processMousePress(x, y, brush);
+        }
+
+    }
+
+    public void processMouseWheel(int x, int y, int k){
+        for (Control c: controls) {
+            c.processMouseWheel(x, y, k);
         }
     }
 

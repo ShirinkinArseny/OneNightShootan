@@ -5,7 +5,8 @@ import java.awt.*;
 import java.awt.image.BufferedImage;
 
 public class Cell {
-    int x,y,wX,wY,size; //x,y - положение в сетке; wX,wY - положение на экране
+    int x,y; //x,y - положение в сетке; wX,wY - положение на экране
+    double wX,wY,size;
     char value;
     BufferedImage brick, light;
 
@@ -29,11 +30,13 @@ public class Cell {
     }
 
     protected void draw(Graphics2D g2){
+        g2.setColor(new Color(0,0,0));
+        g2.drawRect((int)wX,(int)wY,(int)size,(int)size);
         if(value=='b'){
-            g2.drawImage(brick,wX,wY,wX+size,wY+size,0,0,128,128,null);
+            g2.drawImage(brick,(int)wX,(int)wY,(int)(wX+size),(int)(wY+size),0,0,128,128,null);
         }else{
             if(value=='l'){
-                g2.drawImage(light,wX,wY,wX+size,wY+size,0,0,128,128,null);
+                g2.drawImage(light,(int)wX,(int)wY,(int)(wX+size),(int)(wY+size),0,0,128,128,null);
             }
         }
     }

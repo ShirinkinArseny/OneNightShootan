@@ -8,15 +8,20 @@ import java.io.File;
 import java.io.IOException;
 
 public class BlockField extends Control{
-    int width,height,leftB=400,upB=1,size;
+    int width,height,leftBR=400,upBR=1,sizeR,winX,winY; //leftBR/upBR - реальные значения границ, leftB/upB изменяем во время зума
     Cell[][] blocks;/** 'n' - пустая клетка, 'b' - блок **/
     BufferedImage brick, light;
+    double leftB=400,upB=1, k=1, size;
 
     public BlockField(int x, int y, int wX, int wY){
         super(400,wY-1,x*Math.min((wX-400)/x,(wY-1)/y),y*Math.min((wX-400)/x,(wY-1)/y),"");
-        size=Math.min((wX-leftB)/x,(wY-upB)/y);
+        size=Math.min((wX-leftBR)/x,(wY-upBR)/y);
+        sizeR=(int)size;
+        System.out.println(size);
         width=x;
         height=y;
+        winX=wX;
+        winY=wY;
         try {
             brick= ImageIO.read(new File("content/brick.png"));
         } catch (IOException e1) {
@@ -30,22 +35,28 @@ public class BlockField extends Control{
         blocks=new Cell[height][width];
         for(int i=0;i<height;i++){
             for(int j=0;j<width;j++){
-                blocks[i][j]=new Cell(j,i,leftB,upB,size,brick,light);
+                blocks[i][j]=new Cell(j,i,leftBR,upBR,(int)size,brick,light);
             }
         }
     }
 
     public void draw(Graphics2D g2){
         super.draw(g2);
-        g2.setColor(new Color(10,10,10));
-        for(int i=0;i<=height;i++){
-            g2.drawLine(leftB,upB+size*i,leftB+size*width,upB+size*i);
+        //System.out.println("y: "+(int)((upBR-upB)/size)+"; "+(int)((upBR+sizeR*height-upB)/size));
+        //System.out.println("x: "+(int)((leftBR-leftB)/size)+"; "+(int)((leftBR+sizeR*width-leftB)/size));
+        int maxY,maxX;
+        if((int)((upBR+sizeR*height-upB)/size)>height){
+            maxY=height;
+        }else{
+            maxY=(int)((upBR+sizeR*height-upB)/size);
         }
-        for(int i=0;i<=width;i++){
-            g2.drawLine(leftB+size*i,upB,leftB+size*i,upB+size*height);
+        if((int)((leftBR+sizeR*width-leftB)/size)>width){
+            maxX=width;
+        }else{
+            maxX=(int)((leftBR+sizeR*width-leftB)/size);
         }
-        for(int i=0;i<height;i++){
-            for(int j=0;j<width;j++){
+        for(int i=(int)((upBR-upB)/size);i<maxY;i++){
+            for(int j=(int)((leftBR-leftB)/size);j<maxX;j++){
                 blocks[i][j].draw(g2);
             }
         }
@@ -55,22 +66,59 @@ public class BlockField extends Control{
         if((x>=leftB)&&(x<=leftB+size*width)&&(y>=upB)&&(y<=upB+size*height)){
             switch (brush){
                 case "erase":
-                    if(blocks[(y-upB)/size][(x-leftB)/size].value!='n'){
-                        blocks[(y-upB)/size][(x-leftB)/size].clickedR();
+                    if(blocks[(int)((y-upB)/size)][(int)((x-leftB)/size)].value!='n'){
+                        blocks[(int)((y-upB)/size)][(int)((x-leftB)/size)].clickedR();
                     }
                     break;
                 case "brick":
-                    if(blocks[(y-upB)/size][(x-leftB)/size].value!='b'){
-                        blocks[(y-upB)/size][(x-leftB)/size].clickedL('b');
+                    if(blocks[(int)((y-upB)/size)][(int)((x-leftB)/size)].value!='b'){
+                        blocks[(int)((y-upB)/size)][(int)((x-leftB)/size)].clickedL('b');
                     }
                     break;
                 case "light":
-                    if(blocks[(y-upB)/size][(x-leftB)/size].value!='l'){
-                        blocks[(y-upB)/size][(x-leftB)/size].clickedL('l');
+                    if(blocks[(int)((y-upB)/size)][(int)((x-leftB)/size)].value!='l'){
+                        blocks[(int)((y-upB)/size)][(int)((x-leftB)/size)].clickedL('l');
                     }
             }
         }
     }
 
+    public void processMouseWheel(int x,int y,int v) {
+        if((x>=leftBR)&&(x<=leftBR+size*width)&&(y>=upBR)&&(y<=upBR+size*height)){
+            if (v == 1) {
+                k = 0.91;
+            } else {
+                k = 1.1;
+            }
+            for(int i=0;i<height;i++){
+                for(int j=0;j<width;j++){
+                    blocks[i][j].wX=x+k*(blocks[i][j].wX-x);
+                    blocks[i][j].wY=y+k*(blocks[i][j].wY-y);
+                    blocks[i][j].size*=k;
+
+                }
+            }
+            leftB=x+k*(leftB-x);
+            upB=y+k*(upB-y);
+            size*=k;
+            if(leftB>leftBR){
+                move((int)(leftBR-leftB),0);
+            }
+            if (upB > upBR) {
+                    move(0,(int)(upBR-upB));
+            }
+        }
+    }
+
+    public void move(int dx, int dy){
+            for(int i=0;i<height;i++) {
+                for (int j = 0; j < width; j++) {
+                    blocks[i][j].wX+=dx;
+                    blocks[i][j].wY+=dy;
+                }
+            }
+            leftB+=dx;
+            upB+=dy;
+    }
 
 }
