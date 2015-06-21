@@ -45,6 +45,16 @@ public abstract class Control {
 
     }
 
+    public void processMouseDrag(int x,int y, String brush){
 
+    }
+
+    public void processMouseRelease(){
+
+    }
+
+    public void processMousePressed(int x, int y){
+
+    }
 
 }

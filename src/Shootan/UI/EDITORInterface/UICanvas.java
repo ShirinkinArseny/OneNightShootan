@@ -32,7 +32,9 @@ public class UICanvas extends Canvas {
         addMouseMotionListener(new MouseMotionListener() {
             @Override
             public void mouseDragged(MouseEvent e) {
+
                 currentActivity.processMousePress(e.getX(), e.getY());
+                currentActivity.processMouseDrag(e.getX(),e.getY());
             }
 
             @Override
@@ -47,13 +49,11 @@ public class UICanvas extends Canvas {
             }
 
             @Override
-            public void mousePressed(MouseEvent e) {
-
-            }
+            public void mousePressed(MouseEvent e) { currentActivity.processMousePressed(e.getX(), e.getY()); }
 
             @Override
-            public void mouseReleased(MouseEvent e) {
-            }
+            public void mouseReleased(MouseEvent e) { currentActivity.processMouseRelease(); }
+
 
             @Override
             public void mouseEntered(MouseEvent e) {
@@ -118,18 +118,23 @@ public class UICanvas extends Canvas {
 
                 currentActivity = new Activity(0, 0, getWidth(), getHeight(), "brick");
 
-                Button brickButton=new Button(0, 0, "Brick");
+                Button handButton=new Button(0, 0, "Hand");
+                handButton.setAction(() -> currentActivity.setBrush("hand"));
+
+                Button brickButton=new Button(0, 25, "Brick");
                 brickButton.setAction(() -> currentActivity.setBrush("brick"));
 
-                Button lightButton=new Button(0, 25, "Light");
+                Button lightButton=new Button(0, 50, "Light");
                 lightButton.setAction(() -> currentActivity.setBrush("light"));
 
-                Button eraseButton=new Button(0, 50, "Erase");
-                eraseButton.setAction(() -> currentActivity.setBrush("erase"));
+                Button floorButton=new Button(0, 75, "Floor");
+                floorButton.setAction(() -> currentActivity.setBrush("floor"));
+
+
 
                 BlockField field=new BlockField(sizeX,sizeY,getWidth(),getHeight());
 
-                currentActivity.addControl(brickButton).addControl(lightButton).addControl(eraseButton).addControl(field);
+                currentActivity.addControl(handButton).addControl(brickButton).addControl(lightButton).addControl(floorButton).addControl(field);
             }
         });
 

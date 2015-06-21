@@ -50,6 +50,24 @@ public class Activity extends Control {
         }
     }
 
+    public void processMouseDrag(int x, int y){
+        for (Control c: controls) {
+            c.processMouseDrag(x, y, brush);
+        }
+    }
+
+    public void processMouseRelease(){
+        for (Control c: controls) {
+            c.processMouseRelease();
+        }
+    }
+
+    public void processMousePressed(int x, int y){
+        for (Control c: controls) {
+            c.processMousePressed(x,y);
+        }
+    }
+
     protected void setBrush(String brush){
         this.brush=brush;
     }
