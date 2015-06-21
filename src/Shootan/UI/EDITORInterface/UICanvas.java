@@ -113,6 +113,7 @@ public class UICanvas extends Canvas {
                 sizeX = Integer.valueOf(mapWidth.getText());
                 sizeY = Integer.valueOf(mapHeight.getText());
 
+                
                 currentActivity = new Activity(0, 0, getWidth(), getHeight(), "brick");
 
                 Button brickButton=new Button(0, 0, "Brick");
