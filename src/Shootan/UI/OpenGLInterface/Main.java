@@ -90,8 +90,6 @@ public class Main implements Runnable{
 		glClearColor(0f,0f,0f,1.0f);
 
 
-		glActiveTexture(GL_TEXTURE1);
-
 		glEnable(GL_DEPTH_TEST);
 
 		glEnable(GL_BLEND);

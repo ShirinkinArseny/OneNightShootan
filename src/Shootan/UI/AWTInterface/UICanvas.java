@@ -4,7 +4,7 @@ import Shootan.ServerConfigs;
 import Shootan.Network.ClientConnection;
 import Shootan.UI.AWTInterface.Render.UIRender;
 import Shootan.Worlds.ClientWorld;
-import Shootan.Worlds.World;
+import Shootan.Worlds.AbstractWorld;
 import Shootan.UI.AWTInterface.Render.WorldRenderer;
 
 import javax.swing.*;
@@ -109,7 +109,7 @@ public class UICanvas extends Canvas {
                 try {
                     bs = getBufferStrategy();
                     g2 = (Graphics2D) bs.getDrawGraphics();
-                    renderer.setBlockSize(Math.max(getWidth(), getHeight())*3/2/World.potentialViewDistance);
+                    renderer.setBlockSize(Math.max(getWidth(), getHeight())*3/2/ AbstractWorld.potentialViewDistance);
                 } catch (NullPointerException ex) {
                     //ignore
                 }

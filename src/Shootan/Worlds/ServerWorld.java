@@ -1,36 +1,44 @@
 package Shootan.Worlds;
 
 import Shootan.GameEssences.Bullets.Bullet;
-import Shootan.GameEssences.Units.Human;
 import Shootan.GameEssences.Units.Unit;
+import Shootan.GameEssences.Units.VisibleUnit;
 import Shootan.ServerConfigs;
 import Shootan.Utils.IndexWrapper;
 
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.concurrent.CopyOnWriteArrayList;
+import java.util.stream.Collectors;
 
 import static Shootan.Utils.ByteUtils.*;
 
-public class ServerWorld extends StrangeWorld {
+public class ServerWorld extends StrangeWorld implements GamePlayWorldAPI{
 
     private CopyOnWriteArrayList<String> messages=new CopyOnWriteArrayList<>();
 
     private int[] frags;
     private int[] deaths;
+    private GamePlay gameplay;
 
-    public void onKilled(Unit killedUnit, Bullet killer) {
+    protected void onShot(Unit bullet, Bullet shoter) {
+        gameplay.onShot(bullet, shoter);
+    }
 
+    protected void onHit(Unit killedUnit, Bullet killer) {
+        gameplay.onHitAction(killedUnit, killer);
+    }
+
+    protected void onKilled(Unit killedUnit, Bullet killer) {
         frags[killer.getAuthor()]++;
         deaths[killedUnit.getId()]++;
 
-
-        addMessage(killedUnit.getId() + " was pwned by " + killer.getAuthor() + " using " + killer.getName());
+        gameplay.onDeathAction(killedUnit, killer);
     }
 
     @Override
-    public void additionalUpdate(float deltaTime) {
-        /*units.stream().filter(u -> u.getAI() != null).forEach(u -> {
+    protected void additionalUpdate(float deltaTime) {
+        units.stream().filter(u -> u.getAI() != null).forEach(u -> {
             updateVisibilityMap(u.getX(), u.getY());
             ArrayList<VisibleUnit> visibleUnits = new ArrayList<>(20);
             visibleUnits.addAll(
@@ -41,93 +49,44 @@ public class ServerWorld extends StrangeWorld {
             u.getAI().applyIntelligence(u, visibleUnits, this);
         });
 
+        gameplay.update(deltaTime);
 
-        if (System.currentTimeMillis()-startTime>roundTime) {
-            respawn();
-            startTime=System.currentTimeMillis();
-        }*/
     }
 
-
-    private String getStatistic() {
-
-        class FDUnit {
-            private Unit unit;
-            private int deaths;
-            private int frags;
-            private float rate;
-
-            public FDUnit (Unit u) {
-                unit=u;
-                deaths=ServerWorld.this.deaths[u.getId()];
-                frags=ServerWorld.this.frags[u.getId()];
-                rate=-(frags-1.9f*deaths);
-            }
-
-            public int compare(FDUnit u) {
-                return Float.compare(rate, u.rate);
-            }
-
-            public Unit getUnit() {
-                return unit;
-            }
-
-            public float getRate() {
-                return rate;
-            }
-
-            public int getFrags() {
-                return frags;
-            }
-
-            public int getDeaths() {
-                return deaths;
-            }
-
-        }
-
-        ArrayList<FDUnit> sortedUnits=new ArrayList<>(units.size());
-        for (Unit u: units)
-            sortedUnits.add(new FDUnit(u));
-        sortedUnits.sort(FDUnit::compare);
-
-        StringBuilder stat=new StringBuilder();
-        for (FDUnit u: sortedUnits) {
-            stat
-                    .append("ID: ")
-                    .append(u.getUnit().getId())
-                    .append(" RATE: ")
-                    .append(u.getRate())
-                    .append(" FRAGS: ")
-                    .append(u.getFrags())
-                    .append(" DEATHS: ")
-                    .append(u.getDeaths())
-                    .append('\n');
-        }
-
-        return stat.toString();
-    }
-
-    private void dropStat() {
+    public void dropStatistic() {
         for (int i=0; i<units.size(); i++) {
             frags[i]=0;
             deaths[i]=0;
         }
     }
 
-    private void respawn() {
-        System.out.println(getStatistic());
-        for (Unit u: units) {
-            u.setX(10);
-            u.setY(10);
-            u.setHealth(1.0f);
-        }
-        dropStat();
+    public void acceptMessage(String msg) {
+        gameplay.onIncomingMessage(msg);
     }
 
-    public void addMessage(String msg) {
+    public void sendMessage(String msg) {
         System.out.println("Added message: "+msg);
         messages.add(msg);
+    }
+
+    @Override
+    public int getFrags(Unit player) {
+        return frags[player.getId()];
+    }
+
+    @Override
+    public int getDeaths(Unit player) {
+        return deaths[player.getId()];
+    }
+
+    @Override
+    public String getUnitName(Unit u) {
+        for (Player p: playerUnitMap.values()) {
+            if (p.getUnit().getId()==u.getId()) {
+                return p.getName();
+            }
+        }
+        return u.toString();
     }
 
     public ArrayList<Byte> createWorldDump() {
@@ -156,12 +115,7 @@ public class ServerWorld extends StrangeWorld {
 
         Player p=playerUnitMap.get(connectionId);
         if (p!=null) {
-            for (Unit u: units) {
-                if (u.getId()==p.getUnitId()) {
-                    u.deserializeState(data);
-                    break;
-                }
-            }
+            p.getUnit().deserializeState(data);
         }
 
     }
@@ -193,67 +147,46 @@ public class ServerWorld extends StrangeWorld {
             return response;
         }
 
-        int playersNumber=playerUnitMap.size();
-        if (playersNumber==ServerConfigs.serverPlayersLimit) {
-            ArrayList<Byte> response=new ArrayList<>();
-            response.add(booleanToByte(false));
-            response.addAll(stringToBytes("There are no free player slots on server. Used "+playersNumber+"/"+playersNumber));
-            return response;
-        }
+        Unit acceptedUnit=gameplay.acceptConnection();
 
-        int foundFreeId=-1;
-
-        boolean[] freeUnitIDs=new boolean[ServerConfigs.serverPlayersLimit];
-        for (int i=0; i<ServerConfigs.serverPlayersLimit; i++) {
-            freeUnitIDs[i]=true;
-        }
-        for (Player p: playerUnitMap.values()) {
-            freeUnitIDs[p.getUnitId()]=false;
-        }
-        for (int i=0; i<ServerConfigs.serverPlayersLimit; i++) {
-            if (freeUnitIDs[i]) {
-                foundFreeId=i;
-                break;
-            }
-        }
-
-        if (foundFreeId==-1) {
-            ArrayList<Byte> response=new ArrayList<>();
-            response.add(booleanToByte(false));
-            response.addAll(stringToBytes("Some strange shit happened. Seems like all slots are used, but not really. Likely it's a bug"));
-            return response;
-        }
-
-        playerUnitMap.put(connectionId, new Player(userName, foundFreeId));
+        playerUnitMap.put(connectionId, new Player(userName, acceptedUnit));
         ArrayList<Byte> response=new ArrayList<>();
         response.add(booleanToByte(true));
-        response.addAll(uIntToBytes(playersNumber));
+        response.addAll(uIntToBytes(acceptedUnit.getId()));
+
+        response.addAll(uIntToBytes(playerUnitMap.size()));
 
         for (long someConnectionId: playerUnitMap.keySet()) {
             Player p=playerUnitMap.get(someConnectionId);
-            response.addAll(uIntToBytes(p.getUnitId()));
+            response.addAll(uIntToBytes(p.getUnit().getId()));
             response.addAll(stringToBytes(p.getName()));
-            response.addAll(uIntToBytes(frags[p.getUnitId()]));
-            response.addAll(uIntToBytes(deaths[p.getUnitId()]));
+            response.addAll(uIntToBytes(frags[p.getUnit().getId()]));
+            response.addAll(uIntToBytes(deaths[p.getUnit().getId()]));
         }
 
         return response;
     }
 
-    public ServerWorld() {
+    public void addUnit(Unit u) {
+        units.add(u);
+
+        int[] deaths=new int[units.size()];
+        System.arraycopy(this.deaths, 0, deaths, 0, this.deaths.length);
+        deaths[deaths.length-1]=0;
+        this.deaths=deaths;
+
+        int[] frags=new int[units.size()];
+        System.arraycopy(this.frags, 0, deaths, 0, this.frags.length);
+        frags[frags.length-1]=0;
+        this.frags=frags;
+    }
+
+    public ServerWorld(GamePlay gameplay) {
         super();
-
-
-        for (int i=0; i<10; i++)
-            units.add(new Human(10, 10));
-
-        for (Unit u: units) {
-            u.bindAI((me, visibleUnits, world) -> {
-
-            });
-        }
+        this.gameplay = gameplay;
+        gameplay.setGamePlayAPI(this);
         frags=new int[units.size()];
         deaths=new int[units.size()];
-        dropStat();
+        dropStatistic();
     }
 }

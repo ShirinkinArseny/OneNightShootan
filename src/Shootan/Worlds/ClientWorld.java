@@ -107,7 +107,7 @@ public class ClientWorld extends StrangeWorld {
                 }
 
                 if (me==null) {
-                    new Exception("ME is still null").printStackTrace();
+                    new Exception("ME is still null; me.id=="+myId).printStackTrace();
                 }
             }
 
@@ -147,7 +147,6 @@ public class ClientWorld extends StrangeWorld {
 
 
     protected void updateAlifeUnits() {
-        super.updateAlifeUnits();
         for (Unit u: units) {
             if (u.getId()==myId) {
                 me=u;

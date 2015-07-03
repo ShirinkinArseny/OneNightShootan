@@ -3,7 +3,7 @@ package Shootan.UI.OpenGLInterface.Game;
 import Shootan.UI.OpenGLInterface.Graphics.Shader;
 import Shootan.UI.OpenGLInterface.Math.Matrix4f;
 import Shootan.UI.OpenGLInterface.Math.Vector3f;
-import Shootan.Worlds.World;
+import Shootan.Worlds.AbstractWorld;
 
 public class Camera {
 
@@ -23,7 +23,7 @@ public class Camera {
     public void update() {
     }
 
-    public static final float size = World.potentialViewDistance;
+    public static final float size = AbstractWorld.potentialViewDistance;
     public static final int intSize = (int) size;
     public static final Matrix4f pr_matrix =
             Matrix4f.orthographic(-size * 16 / 9, size * 16 / 9, -size, size, -1.0f, 1.0f);

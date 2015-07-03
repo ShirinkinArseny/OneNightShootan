@@ -3,7 +3,7 @@ package Shootan.UI.AWTInterface.Render;
 import Shootan.GameEssences.Bullets.Bullet;
 import Shootan.GameEssences.Units.Unit;
 import Shootan.Worlds.ClientWorld;
-import Shootan.Worlds.World;
+import Shootan.Worlds.AbstractWorld;
 
 import java.awt.*;
 import java.util.ConcurrentModificationException;
@@ -86,8 +86,8 @@ public class WorldRenderer {
             int blockY = (int) w.getMe().getY();
 
             g2.setStroke(new BasicStroke(7));
-            for (int x = blockX - World.potentialViewDistance; x <= blockX + World.potentialViewDistance; x++) {
-                for (int y = blockY - World.potentialViewDistance; y <= blockY + World.potentialViewDistance; y++) {
+            for (int x = blockX - AbstractWorld.potentialViewDistance; x <= blockX + AbstractWorld.potentialViewDistance; x++) {
+                for (int y = blockY - AbstractWorld.potentialViewDistance; y <= blockY + AbstractWorld.potentialViewDistance; y++) {
                     drawBlock(g2, x, y, w, dx, dy);
                 }
             }

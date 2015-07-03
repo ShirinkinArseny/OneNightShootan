@@ -1,7 +1,9 @@
 package Shootan.UI.OpenGLInterface.Graphics;
 
 import Shootan.UI.OpenGLInterface.Math.Matrix4f;
+import Shootan.UI.OpenGLInterface.Math.Vector3f;
 import Shootan.UI.OpenGLInterface.Util.ShaderUtils;
+import org.lwjgl.Sys;
 
 import static Shootan.UI.OpenGLInterface.Util.Utils.checkForGLError;
 import static org.lwjgl.opengl.GL20.*;
@@ -49,6 +51,12 @@ public class Shader {
 					.bindSecondTexture()
 			;
 
+	public static final Shader normalMapping =
+			new Shader("content/normalmapping.vert", "content/normalmapping.frag")
+					.bindFirstTexture()
+					.bindSecondTexture()
+			;
+
 	private static Shader currentShader=null;
 
 	public final int modelMatrixUniformId;
@@ -91,8 +99,10 @@ public class Shader {
 					"Shader id: "+ID).printStackTrace();
 			System.exit(1);
 			return -1;
-		} else
-			return result;
+		}
+
+		System.out.println("Shader "+ID+" registered uniform '"+name+"' as "+result);
+		return result;
 	}
 
 	public void setUniform1i(int id, int value) {
@@ -103,6 +113,12 @@ public class Shader {
 	public void setUniform1f(int id, float value) {
 		forceEnable();
 		glUniform1f(id, value);
+	}
+
+	public void setUniform3f(int id, Vector3f vec) {
+		forceEnable();
+		glUniform3f(id, vec.x, vec.y, vec.z);
+		checkForGLError();
 	}
 
 	public void setUniformMat4f(int id, Matrix4f matrix) {

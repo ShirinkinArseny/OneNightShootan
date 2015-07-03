@@ -6,7 +6,6 @@ public class ServerConfigs {
     public static final int serverPort=1234;
     public static final String serverPassword="1234";
     public static final int gameVersion=1;
-    public static final int serverPlayersLimit=20;
 
 
     public static String playerName="<--1337-->";

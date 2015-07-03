@@ -6,9 +6,9 @@ import Shootan.GameEssences.Units.Unit;
 
 import java.util.List;
 
-public abstract class World {
+public abstract class AbstractWorld {
 
-    public static final int potentialViewDistance =10;
+    public static final int potentialViewDistance =6;
 
     public abstract Block getBlock(int x, int y);
 

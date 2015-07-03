@@ -6,16 +6,14 @@ import Shootan.GameEssences.Blocks.Floor;
 import Shootan.GameEssences.Bullets.Bullet;
 import Shootan.GameEssences.Units.Human;
 import Shootan.GameEssences.Units.Unit;
-import Shootan.GameEssences.Units.VisibleUnit;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.concurrent.CopyOnWriteArrayList;
 
 import static Shootan.Utils.GeometryUtils.getQuadDistFromPointToLine;
 import static Shootan.Utils.GeometryUtils.getQuadIntersectsCircle;
 
-public abstract class StrangeWorld extends World implements VisibleWorld{
+public abstract class StrangeWorld extends AbstractWorld implements VisibleWorld{
 
     public static final int SIZE = 100;
 
@@ -24,8 +22,11 @@ public abstract class StrangeWorld extends World implements VisibleWorld{
     protected boolean[][] visibility = new boolean[SIZE][SIZE];
     protected final ArrayList<Bullet> bullets = new ArrayList<>();
 
-    public void onKilled(Unit killedUnit, Bullet killer) {}
+    protected void onShot(Unit bullet, Bullet shoter) {}
 
+    protected void onHit(Unit killedUnit, Bullet killer) {}
+
+    protected void onKilled(Unit killedUnit, Bullet killer) {}
 
     public Block getVisibleBlock(int x, int y) {
         if (!isVisible(x, y)) return null;
@@ -100,7 +101,7 @@ public abstract class StrangeWorld extends World implements VisibleWorld{
         }*/
     }
 
-    public void updateVisibilityMap(float cameraX, float cameraY) {
+    protected void updateVisibilityMap(float cameraX, float cameraY) {
 
         for (int i=0; i<SIZE; i++) {
             for (int j = 0; j < SIZE; j++) {
@@ -189,6 +190,8 @@ public abstract class StrangeWorld extends World implements VisibleWorld{
                                 u.damage(b.getDamage());
                                 if (u.getHealth()<=0) {
                                     onKilled(u, b);
+                                } else {
+                                    onHit(u, b);
                                 }
                                 ArrayList<Bullet> explosion = b.explode();
                                 if (explosion != null) {
@@ -237,6 +240,7 @@ public abstract class StrangeWorld extends World implements VisibleWorld{
             Bullet b = u.getWeapon().getNewBullet(dt);
             if (b != null) {
                 bullets.add(b);
+                onShot(u, b);
             }
         }
     }
@@ -297,20 +301,7 @@ public abstract class StrangeWorld extends World implements VisibleWorld{
         }
     }
 
-    protected void updateAlifeUnits() {
-            for (int i = 0; i < units.size(); i++) {
-                if (units.get(i).getHealth() <= 0) {
-
-                    Unit u = new Human(10, 10);
-                    u.setId(units.get(i).getId());
-                    units.remove(i);
-                    units.add(u);
-
-                }
-            }
-    }
-
-    public abstract void additionalUpdate(float deltaTime);
+    protected abstract void additionalUpdate(float deltaTime);
 
     @Override
     public void update(float deltaTime) {
@@ -318,7 +309,6 @@ public abstract class StrangeWorld extends World implements VisibleWorld{
         checkForNewShotings(deltaTime);
         updateBulletsCollisions(deltaTime);
         moveBullets(deltaTime);
-        updateAlifeUnits();
         additionalUpdate(deltaTime);
     }
 

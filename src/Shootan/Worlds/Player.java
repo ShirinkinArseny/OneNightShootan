@@ -1,20 +1,22 @@
 package Shootan.Worlds;
 
+import Shootan.GameEssences.Units.Unit;
+
 public class Player {
 
-    private int unitId;
+    private Unit unit;
     private String name;
 
-    public int getUnitId() {
-        return unitId;
+    public Unit getUnit() {
+        return unit;
     }
 
     public String getName() {
         return name;
     }
 
-    public Player(String name, int unitId) {
+    public Player(String name, Unit unit) {
         this.name=name;
-        this.unitId=unitId;
+        this.unit=unit;
     }
 }

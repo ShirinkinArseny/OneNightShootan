@@ -8,9 +8,12 @@ import Shootan.UI.OpenGLInterface.Graphics.Shader;
 import Shootan.UI.OpenGLInterface.Main;
 import Shootan.UI.OpenGLInterface.Math.Matrix4f;
 import Shootan.GameEssences.Units.Unit;
+import Shootan.UI.OpenGLInterface.Math.Vector3f;
 import Shootan.Worlds.ClientWorld;
 import org.lwjgl.opengl.GL14;
 
+
+import java.util.ArrayList;
 
 import static Shootan.UI.OpenGLInterface.Util.Utils.checkForGLError;
 import static org.lwjgl.opengl.GL11.*;
@@ -132,17 +135,19 @@ public class WorldRender {
 
     private AbstractTexture renderWorld() {
 
+
         enableDefaultBlending();
             scene.bindForWriting();
 
         glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-            Shader.defaultShader.enable();
-            camera.lookAtPlayer();
 
-            mapRenderer.render(0, 0);
+            mapRenderer.render(camera, colors, positions);
 
+
+        Shader.defaultShader.enable();
+        camera.lookAtPlayer();
             world.getBullets().forEach(this::drawBullet);
 
             world.getUnits()
@@ -155,6 +160,9 @@ public class WorldRender {
             Shader.defaultShader.disable();
 
             scene.unbindForWriting();
+
+
+        checkForGLError();
             return scene;
     }
 
@@ -167,7 +175,7 @@ public class WorldRender {
 
         camera.lookAt(ddx, ddy);
 
-        mapRenderer.renderHard(0, 0);
+        mapRenderer.renderHard();
 
         Shader.defaultShader.disable();
         hardBlocksBuffer.unbindForWriting();
@@ -195,6 +203,7 @@ public class WorldRender {
         Shader.rollShadows.disable();
         hardBlock.unbind();
         linearShadowsBuffer.unbindForWriting();
+
 
         angledShadowBuffer.bindForWriting();
 
@@ -225,8 +234,6 @@ public class WorldRender {
         Shader.unrollShadows.disable();
         angledShadowBuffer.unbind();
         result.unbindForWriting();
-
-        checkForGLError();
     }
 
     private AbstractTexture renderBlur(AbstractTexture img) {
@@ -263,7 +270,14 @@ public class WorldRender {
     }
 
 
+    private ArrayList<Vector3f> colors=new ArrayList<>();
+    private ArrayList<Vector3f> positions=new ArrayList<>();
+
     private void dropLightning() {
+
+        colors.clear();
+        positions.clear();
+
         additiveBlend.bindForWriting();
         glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
@@ -274,10 +288,12 @@ public class WorldRender {
 
     private void renderLightSource(float x, float y, float r, float g, float b) {
 
-
         if (Math.abs(x-world.getMe().getTimeApproxX())>=Camera.intSize*2 || Math.abs(y-world.getMe().getTimeApproxY())>=Camera.intSize*2) {
             return;
         }
+
+        colors.add(new Vector3f(r, g, b));
+        positions.add(new Vector3f(x, y, 3f));
 
         lightning.tick();
         renderLightMap(lampLightMapBuffer, x, y, r, g, b);
@@ -312,6 +328,11 @@ public class WorldRender {
 
 
         finalFrame.bindForWriting();
+
+
+        glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
+        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
             Shader.multiplyColors.enable();
             camera.lookAtFBOCenter();
 
@@ -347,8 +368,12 @@ public class WorldRender {
         hudBuffer.unbindForWriting();
 
         finalFrame.bindForWriting();
+
             Shader.defaultShader.enable();
             camera.lookAtScreenCenter();
+
+
+
             hudBuffer.bind();
             screen.render(Matrix4f.IDENTITY);
             hudBuffer.unbind();
@@ -358,13 +383,12 @@ public class WorldRender {
     }
 
     private void drawLightSources() {
-        final int[] lightSources = {0};
         dropLightning();
         enableAdditiveBlending();
-        renderLightSource(10, 10, 1f, 1f, 1f); lightSources[0]++;
-        renderLightSource(10, 45, 1f, 0f, 1f); lightSources[0]++;
-        renderLightSource(45, 10, 1f, 1f, 0f); lightSources[0]++;
-        renderLightSource(45, 45, 0f, 1f, 1f); lightSources[0]++;
+        renderLightSource(10, 10, 1f, 1f, 1f);
+        renderLightSource(10, 45, 1f, 0f, 1f);
+        renderLightSource(45, 10, 1f, 1f, 0f);
+        renderLightSource(45, 45, 0f, 1f, 1f);
 
         float time=(System.currentTimeMillis()%1000)/1000f;
 
@@ -393,12 +417,8 @@ public class WorldRender {
                         new Exception("Lightsource >1f").printStackTrace();
                     }
                     renderLightSource(b.getTimeApproxX(), b.getTimeApproxY(), light[0], light[1], light[2]);
-                    lightSources[0]++;
                 });
-        renderLightSource(world.getMe().getTimeApproxX(), world.getMe().getTimeApproxY(), 0.1f, 0.1f, 0.1f);
-        lightSources[0]++;
-
-        //System.out.println("Lightsources: "+lightSources[0]);
+        renderLightSource(world.getMe().getTimeApproxX(), world.getMe().getTimeApproxY(), 0.5f, 0.3f, 0.0f);
     }
 
     private void applyLightning() {
@@ -434,11 +454,14 @@ public class WorldRender {
         applyFov();
         drawHUD();
 
+        //AbstractTexture blurred=renderBlur(finalFrame);
+
+
         Shader.defaultShader.enable();
         camera.lookAtFBOCenter();
         finalFrame.bind();
         screen.render(Matrix4f.IDENTITY);
-        scene.unbind();
+        finalFrame.unbind();
         Shader.defaultShader.disable();
 
 

@@ -2,7 +2,7 @@ package Shootan.UI.AWTInterface.Render;
 
 import Shootan.GameEssences.Blocks.Block;
 import Shootan.Worlds.ClientWorld;
-import Shootan.Worlds.World;
+import Shootan.Worlds.AbstractWorld;
 
 import java.awt.*;
 import java.awt.image.BufferedImage;
@@ -67,16 +67,16 @@ public class UIRender {
 
     public void updateMap(ClientWorld world) {
 
-        BufferedImage map=new BufferedImage(World.potentialViewDistance *2, World.potentialViewDistance *2, BufferedImage.TYPE_INT_ARGB);
+        BufferedImage map=new BufferedImage(AbstractWorld.potentialViewDistance *2, AbstractWorld.potentialViewDistance *2, BufferedImage.TYPE_INT_ARGB);
 
         Graphics2D g2= (Graphics2D) map.getGraphics();
 
         int x=1;
-        for (int i= (int) (world.getMe().getX()-World.potentialViewDistance); i<world.getMe().getX()+World.potentialViewDistance; i++) {
+        for (int i= (int) (world.getMe().getX()- AbstractWorld.potentialViewDistance); i<world.getMe().getX()+ AbstractWorld.potentialViewDistance; i++) {
 
             int y=1;
 
-            for (int j= (int) (world.getMe().getY()-World.potentialViewDistance); j<world.getMe().getY()+World.potentialViewDistance; j++) {
+            for (int j= (int) (world.getMe().getY()- AbstractWorld.potentialViewDistance); j<world.getMe().getY()+ AbstractWorld.potentialViewDistance; j++) {
 
                 Block b=world.getBlock(i, j);
                 int visibility=(b==null || b.getIsHard())?255:0;

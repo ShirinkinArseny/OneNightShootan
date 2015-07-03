@@ -16,4 +16,5 @@ void main()
 	color.r*=color.a;
 	color.g*=color.a;
 	color.b*=color.a;
+
 }
